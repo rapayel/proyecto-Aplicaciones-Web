@@ -1,0 +1,10 @@
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+}
+#btnIniciarSesion{
+    border-radius: 15px;
+}
