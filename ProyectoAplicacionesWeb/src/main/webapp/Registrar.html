@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="UTF-8">
+    <title>Registrarse</title>
+    <link rel="stylesheet" type="text/css" href="./estilosCSS/estiloIniciarSesion.css">
+</head>
+<body>
+    <div class="background-blur"></div>
+    <div class="login-container">
+        <h1>Registro</h1>
+        <form action="ControladorTienda" method="POST">
+        <input type="hidden" name="accion" value="validarLogin">
+            <div class="form-group">
+                <label for="text">Nombre Completo</label>
+                <input type="text" id="nombre" name="txtNombre" placeholder="Ingresa un nombre completo" 
+                required>
+            </div>
+            <div class="form-group">
+                <label for="text">Nombre de Usuario</label>
+                <input type="text" id="usuario" name="txtUsuario" placeholder="Ingresa un nombre de usuario" 
+                pattern="[a-zA-Z0-9._%+-]" required>
+            </div>
+            <div class="form-group">
+                <label for="text">Direccion</label>
+                <input type="text" id="nombre" name="txtnombre" placeholder="Ingresa una direccion" 
+                 required>
+            </div>
+            <div class="form-group">
+                <label for="email">Correo Electronico  (ejemplo@gmail.com)</label>
+                <input type="text" id="email" name="txtEmail" placeholder="Ingresa un usuario" 
+                pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña (ejemplo12345!)</label>
+                <input type="password" id="password" name="txtPassword" placeholder="Ingresa una contraseña" 
+                pattern="^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{12,}$" required>
+            </div>
+            <button type="submit" class="btn">Registrarme</button>
+        </form>
+    </div>
+</body>
+</html>
