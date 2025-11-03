@@ -1,0 +1,2 @@
+use panelSolar;
+insert into Usuario(nombreCompleto, nombreUsuario, direccion, correo, contrasena, rool) values("Luis Rafael Lagarda Encinas", "xrapayel", "nose", "luisrafaellagarda@gmail.com", "pruebas", "cliente");
