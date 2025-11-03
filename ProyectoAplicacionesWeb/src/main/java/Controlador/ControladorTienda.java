@@ -5,7 +5,7 @@
 package Controlador;
 
 import Modelo.Conexiones.ConexionMySQL;
-import Modelo.Entidades.Usuario;
+import Modelo.Entidades.Usuarios;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -25,16 +25,7 @@ import java.sql.SQLException;
  */
 @WebServlet(name = "ControladorTienda", urlPatterns = {"/ControladorTienda"})
 public class ControladorTienda extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+    ConexionMySQL  cn = new ConexionMySQL();
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -79,9 +70,14 @@ public class ControladorTienda extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String accion = request.getParameter("accion");
-        
-        if("validarLogin".equals(accion)){
+        if ("validarLogin".equals(accion)) {
             validarLogin(request, response);
+        } 
+        else if ("registrarUsuario".equals(accion)) {
+            registrarUsuario(request, response);
+        } 
+        else {
+            response.sendRedirect("errorPagina.html"); 
         }
     }
 
@@ -95,48 +91,70 @@ public class ControladorTienda extends HttpServlet {
         return "Short description";
     }// </editor-fold>
     
-    private void validarLogin(HttpServletRequest request, HttpServletResponse response)
+    private void registrarUsuario(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        String nombreCompleto = request.getParameter("txtNombre");
+        String nombreUsuario = request.getParameter("txtUsuario");
+        String direccion = request.getParameter("txtDireccion");
+        String correo = request.getParameter("txtEmail");
+        String contraseña = request.getParameter("txtPassword");
 
-        String email = request.getParameter("txtEmail");
-        String password = request.getParameter("txtPassword");
-
-        ConexionMySQL conexionBD = new ConexionMySQL();
-        Connection con = conexionBD.conexion();
-
-        try {
-            String sql = "SELECT * FROM usuarios WHERE correo = ? AND contraseña = ?";
+        try (Connection con = cn.conexion()) {
+            String sql = "INSERT INTO Usuarios (nombreCompleto, nombreUsuario, direccion, correo, contraseña, rool) "
+                       + "VALUES (?, ?, ?, ?, ?, 'cliente')";
             PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                // Crear objeto Usuario
-                Usuario usuario = new Usuario(
-                    rs.getString("id"),
-                    rs.getString("nombreCompleto"),
-                    rs.getString("nombreUsuario"),
-                    rs.getString("direccion"),
-                    rs.getString("correo"),
-                    rs.getString("contraseña")
-                );
-
-                // Crear sesión y guardar al usuario
-                HttpSession sesion = request.getSession();
-                sesion.setAttribute("usuario", usuario);
-
-                // Redirigir a página principal
-                response.sendRedirect("Principal.jsp");
+            ps.setString(1, nombreCompleto);
+            ps.setString(2, nombreUsuario);
+            ps.setString(3, direccion);
+            ps.setString(4, correo);
+            ps.setString(5, contraseña);
+            int filas = ps.executeUpdate();
+            if (filas > 0) {
+                response.sendRedirect("InicioSesion.html?registro=ok");
             } else {
-                // Si no existe el usuario
-                request.setAttribute("mensajeError", "Correo o contraseña incorrectos.");
-                request.getRequestDispatcher("IniciarSesion.jsp").forward(request, response);
+                response.sendRedirect("registro.html?error=1");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
-            response.getWriter().println("Error en la conexión o consulta: " + e.getMessage());
+            response.sendRedirect("registro.html?error=2");
+        }
+    }
+    private void validarLogin(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        String email = request.getParameter("txtEmail");
+        String password = request.getParameter("txtPassword");
+        ConexionMySQL conexionBD = new ConexionMySQL();
+        Connection con = conexionBD.conexion();
+        if (con == null) {
+            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
+            request.getRequestDispatcher("IniciarSesion.jsp").forward(request, response);
+            return;
+        }
+        String sql = "SELECT * FROM Usuarios WHERE correo = ? AND contraseña = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setString(2, password);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Usuarios usuario = new Usuarios(
+                        rs.getString("id"),
+                        rs.getString("nombreCompleto"),
+                        rs.getString("nombreUsuario"),
+                        rs.getString("direccion"),
+                        rs.getString("correo"),
+                        rs.getString("contraseña"),
+                        rs.getString("imagenPerfil")
+                    );
+                    HttpSession sesion = request.getSession();
+                    sesion.setAttribute("usuario", usuario);
+                    response.sendRedirect("index.html");
+                } else {
+                    request.setAttribute("mensajeError", "Correo o contraseña incorrectos.");
+                    request.getRequestDispatcher("IniciarSesion.jsp").forward(request, response);
+                }
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Error al validar usuario: " + e.getMessage(), e);
         } finally {
             conexionBD.desconectar();
         }

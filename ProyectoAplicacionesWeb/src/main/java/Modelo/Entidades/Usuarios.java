@@ -8,32 +8,36 @@ package Modelo.Entidades;
  *
  * @author lagar
  */
-public class Usuario {
+
+public class Usuarios {
     private String id;
     private String nombreCompleto;
     private String nombreUsuario;
     private String direccion;
     private String correo;
-    private String dontraseña;
+    private String contraseña; 
+    private String imagenPerfil; 
 
-    public Usuario() {
+    public Usuarios() {
     }
-    
-    public Usuario(String nombreCompleto, String nombreUsuario, String direccion, String correo, String dontraseña) {
+
+    public Usuarios(String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña) {
         this.nombreCompleto = nombreCompleto;
         this.nombreUsuario = nombreUsuario;
         this.direccion = direccion;
         this.correo = correo;
-        this.dontraseña = dontraseña;
+        this.contraseña = contraseña;
     }
-
-    public Usuario(String id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String dontraseña) {
+    
+    
+    public Usuarios(String id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña, String imagenPerfil) {
         this.id = id;
         this.nombreCompleto = nombreCompleto;
         this.nombreUsuario = nombreUsuario;
         this.direccion = direccion;
         this.correo = correo;
-        this.dontraseña = dontraseña;
+        this.contraseña = contraseña;
+        this.imagenPerfil = imagenPerfil;
     }
 
     public String getId() {
@@ -76,11 +80,20 @@ public class Usuario {
         this.correo = correo;
     }
 
-    public String getDontraseña() {
-        return dontraseña;
+    public String getContraseña() {
+        return contraseña;
     }
 
-    public void setDontraseña(String dontraseña) {
-        this.dontraseña = dontraseña;
+    public void setContraseña(String contraseña) {
+        this.contraseña = contraseña;
+    }
+
+    public String getImagenPerfil() {
+        return imagenPerfil;
+    }
+
+    public void setImagenPerfil(String imagenPerfil) {
+        this.imagenPerfil = imagenPerfil;
     }
 }
+
