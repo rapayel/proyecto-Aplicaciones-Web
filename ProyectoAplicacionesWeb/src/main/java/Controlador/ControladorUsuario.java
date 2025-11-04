@@ -4,6 +4,7 @@
  */
 package Controlador;
 
+import Modelo.Conexiones.ConexionEmail;
 import Modelo.Conexiones.ConexionMySQL;
 import Modelo.Entidades.Usuarios;
 import java.io.IOException;
@@ -23,9 +24,12 @@ import java.sql.SQLException;
  *
  * @author lagar
  */
-@WebServlet(name = "ControladorTienda", urlPatterns = {"/ControladorTienda"})
-public class ControladorTienda extends HttpServlet {
-    ConexionMySQL  cn = new ConexionMySQL();
+@WebServlet(name = "ControladorUsuario", urlPatterns = {"/ControladorUsuario"})
+public class ControladorUsuario extends HttpServlet {
+    public ConexionMySQL  cn = new ConexionMySQL();
+    private String usuario = "luisrafaellagarda@gmail.com";
+    private String contrasena = "geuovtjluuyeeuhr";
+
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -72,6 +76,7 @@ public class ControladorTienda extends HttpServlet {
         String accion = request.getParameter("accion");
         if ("validarLogin".equals(accion)) {
             validarLogin(request, response);
+             
         } 
         else if ("registrarUsuario".equals(accion)) {
             registrarUsuario(request, response);
@@ -111,6 +116,8 @@ public class ControladorTienda extends HttpServlet {
             int filas = ps.executeUpdate();
             if (filas > 0) {
                 response.sendRedirect("InicioSesion.html?registro=ok");
+                ConexionEmail gmail = new ConexionEmail (this.usuario, this.contrasena);
+                gmail.enviarCorreo(correo, "Bienvenido a nuestra tienda online de paneles solares", "gracias por registrarse en nuestra pagina, atentos a notifiaciones");
             } else {
                 response.sendRedirect("registro.html?error=1");
             }

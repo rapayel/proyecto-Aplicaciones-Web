@@ -17,4 +17,6 @@ CREATE TABLE Usuarios (
 ALTER TABLE Usuarios CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 INSERT INTO Usuarios(nombreCompleto, nombreUsuario, direccion, correo, contraseña, rool, imagenPerfil)
 VALUES ("Luis Rafael Lagarda Encinas", "xrapayel", "nose", "luisrafaellagarda@gmail.com", "abcdef123456@", "cliente", NULL);
-SELECT * FROM Usuarios;
+
+
+
