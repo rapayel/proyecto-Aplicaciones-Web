@@ -128,7 +128,7 @@ public class ControladorUsuario extends HttpServlet {
     }
     private void validarLogin(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        String email = request.getParameter("txtEmail");
+        String nombreUsuario = request.getParameter("txtUsuario");
         String password = request.getParameter("txtPassword");
         ConexionMySQL conexionBD = new ConexionMySQL();
         Connection con = conexionBD.conexion();
@@ -137,9 +137,9 @@ public class ControladorUsuario extends HttpServlet {
             request.getRequestDispatcher("IniciarSesion.jsp").forward(request, response);
             return;
         }
-        String sql = "SELECT * FROM Usuarios WHERE correo = ? AND contraseña = ?";
+        String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ? AND contraseña = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, email);
+            ps.setString(1, nombreUsuario);
             ps.setString(2, password);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
