@@ -159,7 +159,8 @@ public class ControladorUsuario extends HttpServlet {
                     );
                     HttpSession sesion = request.getSession();
                     sesion.setAttribute("usuario", usuario);
-                    response.sendRedirect("index.html");
+                    //accede al controlador para mostrar pagina principal
+                    response.sendRedirect("ControladorPrincipal?accion=listar");
                     cn.desconectar();
                 } else {
                     request.setAttribute("mensajeError", "Correo o contraseña incorrectos.");
