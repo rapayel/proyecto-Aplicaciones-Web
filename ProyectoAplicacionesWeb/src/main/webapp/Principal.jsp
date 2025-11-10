@@ -1,4 +1,4 @@
-<%@ page import="java.util.*, Modelo.Entidades.Productos, Modelo.Entidades.Usuarios" %>
+<%@ page import="java.util.*, Modelo.Entidades.Productos" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="es">
@@ -6,7 +6,6 @@
     <meta charset="UTF-8">
     <title>Tienda Solar</title>
     <link rel="stylesheet" href="estilosCSS/estiloPrincipalJSP.css">
-
 </head>
 <body>
     <div class="background-blur"></div>
@@ -26,10 +25,12 @@
             </div>
 
             <div class="carrito">
-                🛒 <span id="contador">0</span>
+                <a href="ControladorCarrito?accion=verCarrito" class="carrito-link" title="Ver carrito">
+                    🛒 <span id="contador">0</span>
+                </a>
                 <p class="nombre-usuario">
                     <% 
-                        String usuario = (String) session.getAttribute("usuario");
+                        String usuario = (String) session.getAttribute("nombreUsuario");
                         if (usuario != null) out.print(usuario);
                         else out.print("Invitado");
                     %>
@@ -45,27 +46,23 @@
                 out.println("<p style='color:red;'>⚠️ La lista de productos es NULL (el servlet no la envió)</p>");
             } else if (lista.isEmpty()) {
                 out.println("<p style='color:orange;'>⚠️ La lista está vacía (consulta sin resultados)</p>");
-            } else {
-              //  out.println("<p style='color:red;'>️Productos disponibles; </p>");
             }
         %>
     </section>
    
     <main>         
-            <div class="titulo-productos">
-                <h2>
-                     <img src="images/solar.png" alt="Icono solar" class="icono-solar"> Productos Disponibles
-                </h2>
-            </div>
+        <div class="titulo-productos">
+            <h2>
+                <img src="images/solar.png" alt="Icono solar" class="icono-solar"> Productos Disponibles
+            </h2>
+        </div>
         
         <div class="contenedor-productos">
         <%
-            // Usamos la misma lista del bloque anterior
             if (lista != null && !lista.isEmpty()) {
                 for (Productos p : lista) {
         %>
             <div class="producto">
-                 imagen temporal para mostrar producto
                 <img src="images/panel_monocristalino_400w.png" alt="Imagen del producto"> 
                 <h3><%= p.getProducto() %></h3>
                 <p class="descripcion"><%= p.getDescripcion() %></p>
@@ -73,8 +70,9 @@
                 <form action="ControladorPrincipal?accion=agregarCarrito" method="post">
                     <input type="hidden" name="accion" value="agregarCarrito">
                     <input type="hidden" name="id" value="<%= p.getId() %>">
+                    <input type="hidden" name="idUsuario" value="<%= session.getAttribute("idUsuario") %>">
                     <input type="number" name="Cantidad_Stock" value="1" min="1" max="<%= p.getCantidad_Stock() %>">
-                    <button type="submit">Agregar al carrito</button>
+                    <button type="submit" class="btn-agregar">Agregar al carrito</button>
                 </form>
             </div>
         <%
@@ -85,7 +83,7 @@
         <%
             }
         %>
+        </div>
     </main>
 </body>
 </html>
-

@@ -1,5 +1,6 @@
 package Controlador;
 
+import Modelo.Conexiones.ConexionMySQL;
 import Modelo.Entidades.Productos;
 import java.io.IOException;
 import java.sql.*;
@@ -10,10 +11,7 @@ import jakarta.servlet.http.*;
 
 @WebServlet(name = "ControladorPrincipal", urlPatterns = {"/ControladorPrincipal"})
 public class ControladorPrincipal extends HttpServlet {
-
-    private static final String URL = "jdbc:mysql://localhost:3306/panelsolar";
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
+    private final ConexionMySQL cn = new ConexionMySQL();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -46,31 +44,31 @@ public class ControladorPrincipal extends HttpServlet {
 
     private void listarProductos(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         List<Productos> lista = new ArrayList<>();
 
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                String sql = "SELECT * FROM productos";
-                PreparedStatement ps = con.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery();
+        try (Connection con = cn.conexion()) {
+            CallableStatement stmt = con.prepareCall("{CALL sp_listarProductos()}");
+            ResultSet rs = stmt.executeQuery();
 
-                while (rs.next()) {
-                    Productos p = new Productos();
-                    p.setId(rs.getInt("id"));
-                    p.setProducto(rs.getString("producto"));
-                    p.setMarca(rs.getString("marca"));
-                    p.setModelo(rs.getString("modelo"));
-                    p.setDescripcion(rs.getString("descripcion"));
-                    p.setPrecio_compra(rs.getDouble("precioCompra"));
-                    p.setPrecio_venta(rs.getDouble("precioVenta"));
-                    p.setCantidad_Stock(rs.getInt("Cantidad_Stock"));
-                    lista.add(p);
-                   System.out.println("Producto cargado: " + p.getProducto());
-                }
+            while (rs.next()) {
+                Productos p = new Productos();
+                p.setId(rs.getInt("id"));
+                p.setProducto(rs.getString("producto"));
+                p.setMarca(rs.getString("marca"));
+                p.setModelo(rs.getString("modelo"));
+                p.setDescripcion(rs.getString("descripcion"));
+                p.setPrecio_compra(rs.getDouble("precioCompra"));
+                p.setPrecio_venta(rs.getDouble("precioVenta"));
+                p.setCantidad_Stock(rs.getInt("Cantidad_Stock"));
+                lista.add(p);
             }
-        } catch (ClassNotFoundException | SQLException e) {
+
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
             e.printStackTrace();
+            System.err.println("❌ Error al listar productos: " + e.getMessage());
         }
 
         request.setAttribute("productos", lista);
@@ -79,45 +77,28 @@ public class ControladorPrincipal extends HttpServlet {
 
     private void agregarCarrito(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        int idUsuario = Integer.parseInt(request.getParameter("idUsuario"));
         int idProducto = Integer.parseInt(request.getParameter("id"));
         int cantidadSolicitada = Integer.parseInt(request.getParameter("Cantidad_Stock"));
 
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            try (Connection con = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                String sql = "SELECT * FROM productos WHERE id = ?";
-                PreparedStatement ps = con.prepareStatement(sql);
-                ps.setInt(1, idProducto);
-                ResultSet rs = ps.executeQuery();
+        try (Connection con = cn.conexion()) {
+            CallableStatement stmt = con.prepareCall("{CALL sp_AgregarProductoCarrito(?,?,?)}");
+            stmt.setInt(1, idUsuario);
+            stmt.setInt(2, idProducto);
+            stmt.setInt(3, cantidadSolicitada);
 
-                if (rs.next()) {
-                    int cantidadDisponible = rs.getInt("Cantidad_Stock");
-                    if (cantidadSolicitada <= cantidadDisponible) {
-                        Productos p = new Productos();
-                        p.setId(rs.getInt("id"));
-                        p.setProducto(rs.getString("producto"));
-                        p.setMarca(rs.getString("marca"));
-                        p.setModelo(rs.getString("modelo"));
-                        p.setDescripcion(rs.getString("descripcion"));
-                        p.setPrecio_compra(rs.getDouble("precioCompra"));
-                        p.setPrecio_venta(rs.getDouble("precioVenta"));
-                        p.setCantidad_Stock(cantidadSolicitada);
-
-                        HttpSession sesion = request.getSession();
-                        List<Productos> carrito = (List<Productos>) sesion.getAttribute("carrito");
-                        if (carrito == null) carrito = new ArrayList<>();
-                        carrito.add(p);
-                        sesion.setAttribute("carrito", carrito);
-
-                        request.setAttribute("mensaje", "Producto agregado correctamente.");
-                    } else {
-                        request.setAttribute("mensaje", "No hay suficiente cantidad disponible.");
-                    }
-                }
+            try {
+                stmt.execute();
+                request.setAttribute("mensaje", "✅ Producto agregado correctamente al carrito.");
+            } catch (SQLException ex) {
+                request.setAttribute("mensaje", "⚠️ " + ex.getMessage());
             }
-        } catch (ClassNotFoundException | SQLException e) {
+
+            stmt.close();
+        } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("mensaje", "Error al agregar al carrito.");
+            request.setAttribute("mensaje", "❌ Error al agregar producto al carrito: " + e.getMessage());
         }
 
         listarProductos(request, response);

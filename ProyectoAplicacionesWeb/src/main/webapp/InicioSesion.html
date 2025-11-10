@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    <head>
+<head>
     <meta charset="UTF-8">
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" type="text/css" href="./estilosCSS/estiloUsuario.css">
@@ -10,19 +10,29 @@
     <div class="login-container">
         <h1>Iniciar Sesión</h1>
         <form action="ControladorUsuario" method="POST">
-        <input type="hidden" name="accion" value="validarLogin">
+            <input type="hidden" name="accion" value="validarLogin">
+            
             <div class="form-group">
                 <label for="usuario">Nombre de Usuario</label>
-                <input type="text" id="usuario" name="txtUsuario" placeholder="Ingresa un nombre de usuario" 
-                pattern="[a-zA-Z0-9._%+-]+" required>
+                <input type="text" id="usuario" name="txtUsuario" 
+                       placeholder="Ingresa un nombre de usuario" 
+                       pattern="[A-Za-z0-9]+" 
+                       title="Solo se permiten letras y números"
+                       required>
             </div>
+            
             <div class="form-group">
-                <label for="password">Contraseña (ejemplo12345!)</label>
-                <input type="password" id="password" name="txtPassword" placeholder="Ingresa una contraseña" 
-                pattern="^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{12,}$" required>
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="txtPassword" 
+                       placeholder="Ingresa una contraseña" 
+                       pattern="[A-Za-z0-9]+" 
+                       title="Solo se permiten letras y números"
+                       required>
             </div>
+            
             <button type="submit" class="btn">Entrar</button>
         </form>
+        
         <div class="links-adicionales">
             <a href="Recuperar.html">¿Olvidaste tu contraseña?</a>
             <a href="Registrar.html">¿Aún no tienes una cuenta?</a>

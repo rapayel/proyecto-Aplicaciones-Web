@@ -15,10 +15,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.JOptionPane;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  *
@@ -72,22 +75,60 @@ public class ControladorUsuario extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String accion = request.getParameter("accion");
-        if ("validarLogin".equals(accion)) {
-            validarLogin(request, response);
-        } 
-        else if ("registrarUsuario".equals(accion)) {
-            registrarUsuario(request, response);
-        } 
-        else if("recuperarCuenta".equals(accion)) {
-             recuperarCuenta(request, response);
-        }
-        else {
-            response.sendRedirect("errorPagina.html"); 
-        }
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+    String accion = request.getParameter("accion");
+
+    if ("validarLogin".equals(accion)) {
+        validarLogin(request, response);
+    } 
+    else if ("registrarUsuario".equals(accion)) {
+        registrarUsuario(request, response);
+    } 
+    else if ("recuperarCuenta".equals(accion)) {
+        recuperarCuenta(request, response);
+    } 
+    else {
+        response.sendRedirect("errorPagina.html"); 
     }
+}
+
+/**
+ * Método encargado de validar el inicio de sesión de un usuario
+ */
+private void validarLogin(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    
+    // Obtener parámetros del formulario
+    String nombreUsuario = request.getParameter("txtUsuario");
+    String password = request.getParameter("txtPassword");
+
+    // Crear el objeto Usuario y asignar valores
+    Usuarios usuario = new Usuarios();
+    usuario.setNombreUsuario(nombreUsuario);
+    usuario.setContraseña(password);
+
+    // Ejecutar el método Loggin para validar credenciales
+    int userId = Loggin(usuario);
+
+    if (userId > 0) {
+        // Inicio de sesión exitoso → crear sesión
+        HttpSession session = request.getSession();
+        session.setAttribute("idUsuario", userId);
+        session.setAttribute("nombreUsuario", nombreUsuario);
+
+        // Redirigir al menú principal o página de inicio
+        response.sendRedirect("ControladorPrincipal?accion=listar");
+
+    } 
+    else {
+        // Usuario o contraseña incorrectos → regresar al login con mensaje
+        request.setAttribute("mensajeError", "Usuario o contraseña incorrectos");
+        request.getRequestDispatcher("login.jsp").forward(request, response);
+    }
+}
+
 
     /**
      * Returns a short description of the servlet.
@@ -131,49 +172,7 @@ public class ControladorUsuario extends HttpServlet {
         }
     }
     
-    private void validarLogin(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String nombreUsuario = request.getParameter("txtUsuario");
-        String password = request.getParameter("txtPassword");
-
-        Connection con = cn.conexion();
-        if (con == null) {
-            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
-            request.getRequestDispatcher("InicioSesion.html").forward(request, response);
-            return;
-        }
-        String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ? AND contraseña = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, nombreUsuario);
-            ps.setString(2, password);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Usuarios usuario = new Usuarios(
-                        rs.getString("id"),
-                        rs.getString("nombreCompleto"),
-                        rs.getString("nombreUsuario"),
-                        rs.getString("direccion"),
-                        rs.getString("correo"),
-                        rs.getString("contraseña"),
-                        rs.getString("imagenPerfil")
-                    );
-                    HttpSession sesion = request.getSession();
-                    sesion.setAttribute("usuario", usuario);
-                    //accede al controlador para mostrar pagina principal
-                    response.sendRedirect("ControladorPrincipal?accion=listar");
-                    cn.desconectar();
-                } else {
-                    request.setAttribute("mensajeError", "Correo o contraseña incorrectos.");
-                    request.getRequestDispatcher("InicioSesion.html").forward(request, response);
-                    cn.desconectar();
-                }
-            }
-        } catch (SQLException e) {
-            throw new ServletException("Error al validar usuario: " + e.getMessage(), e);
-        } 
-    }
-    
-    private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
+       private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         String nombreUsuario = request.getParameter("txtUsuario");
         Connection con = cn.conexion();
@@ -201,5 +200,46 @@ public class ControladorUsuario extends HttpServlet {
         } catch (SQLException e) {
             throw new ServletException("Error al intentar recuperar contraseña: " + e.getMessage(), e);
         } 
+    }
+    
+    // METODOS DE ENCRIPTACION
+    // Método para encriptar la contraseña usando BCrypt
+    private String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    // Método para verificar la contraseña (al hacer login)
+    public boolean verifyPassword(String password, String storedHashedPassword) {
+        return BCrypt.checkpw(password, storedHashedPassword);
+    }
+   //LOGIN
+    // Método para verificar usuario y contraseña usando el procedimiento almacenado
+    // Método para verificar el login
+    public int Loggin(Usuarios usuario) {
+        int userId = -1;
+
+        try {
+            Connection con = cn.conexion();
+            CallableStatement stmt = con.prepareCall("{CALL SP_Loggin(?)}");
+            stmt.setString(1, usuario.getNombreUsuario());
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String hashedPassword = rs.getString("CONTRASEÑA");
+
+                // Verificar si la contraseña ingresada coincide con el hash almacenado
+                if (BCrypt.checkpw(usuario.getContraseña(), hashedPassword)) {
+                    userId = rs.getInt("ID"); // Retorna el ID del usuario
+                    System.out.println("Loggin Exitoso");
+                }
+            }
+
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error en login: " + e.getMessage());
+        }
+
+        return userId; // Retorna -1 si no se encontró el usuario o la contraseña no es válida
     }
 }
