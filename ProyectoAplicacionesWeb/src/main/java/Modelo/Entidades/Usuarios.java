@@ -16,6 +16,7 @@ public class Usuarios {
     private String direccion;
     private String correo;
     private String contraseña; 
+    private String rol;
     private String imagenPerfil; 
 
     public Usuarios() {
@@ -28,8 +29,7 @@ public class Usuarios {
         this.correo = correo;
         this.contraseña = contraseña;
     }
-    
-    
+
     public Usuarios(String id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña, String imagenPerfil) {
         this.id = id;
         this.nombreCompleto = nombreCompleto;
@@ -37,6 +37,18 @@ public class Usuarios {
         this.direccion = direccion;
         this.correo = correo;
         this.contraseña = contraseña;
+        this.imagenPerfil = imagenPerfil;
+    }
+    
+    
+    public Usuarios(String id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña, String rol, String imagenPerfil) {
+        this.id = id;
+        this.nombreCompleto = nombreCompleto;
+        this.nombreUsuario = nombreUsuario;
+        this.direccion = direccion;
+        this.correo = correo;
+        this.contraseña = contraseña;
+        this.rol = rol;
         this.imagenPerfil = imagenPerfil;
     }
 
@@ -88,6 +100,14 @@ public class Usuarios {
         this.contraseña = contraseña;
     }
 
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
     public String getImagenPerfil() {
         return imagenPerfil;
     }
@@ -96,4 +116,3 @@ public class Usuarios {
         this.imagenPerfil = imagenPerfil;
     }
 }
-

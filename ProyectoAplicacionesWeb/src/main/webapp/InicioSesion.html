@@ -25,8 +25,8 @@
                 <label for="password">Contraseña</label>
                 <input type="password" id="password" name="txtPassword" 
                        placeholder="Ingresa una contraseña" 
-                       pattern="[A-Za-z0-9]+" 
-                       title="Solo se permiten letras y números"
+                       pattern="^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{12,}$" 
+                       title="debe de tener 12 caracteres con numeros, letras y almenos un simbolo"
                        required>
             </div>
             

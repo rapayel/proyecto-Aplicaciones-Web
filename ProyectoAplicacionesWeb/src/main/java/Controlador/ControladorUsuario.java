@@ -6,7 +6,9 @@ package Controlador;
 
 import Modelo.Conexiones.ConexionEmail;
 import Modelo.Conexiones.ConexionMySQL;
+import Modelo.DAO.UsuarioDAO;
 import Modelo.Entidades.Usuarios;
+import Servicios.ServicioGmail;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -15,13 +17,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.swing.JOptionPane;
-import org.mindrot.jbcrypt.BCrypt;
 
 /**
  *
@@ -29,10 +25,8 @@ import org.mindrot.jbcrypt.BCrypt;
  */
 @WebServlet(name = "ControladorUsuario", urlPatterns = {"/ControladorUsuario"})
 public class ControladorUsuario extends HttpServlet {
-    public ConexionMySQL  cn = new ConexionMySQL();
-    private String usuario = "luisrafaellagarda@gmail.com";
-    private String contrasena = "geuovtjluuyeeuhr";
-    private ConexionEmail gmail = new ConexionEmail (this.usuario, this.contrasena);
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
+    private final  ServicioGmail  servicioGmail= new ServicioGmail();
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -75,71 +69,26 @@ public class ControladorUsuario extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    String accion = request.getParameter("accion");
+        String accion = request.getParameter("accion");
 
-    if ("validarLogin".equals(accion)) {
-        validarLogin(request, response);
-    } 
-    else if ("registrarUsuario".equals(accion)) {
-        registrarUsuario(request, response);
-    } 
-    else if ("recuperarCuenta".equals(accion)) {
-        recuperarCuenta(request, response);
-    } 
-    else {
-        response.sendRedirect("errorPagina.html"); 
+            switch (accion) {
+                case "validarLogin":
+                    validarLogin(request, response);
+                    break;
+                case "registrarUsuario":
+                    registrarUsuario(request, response);
+                    break;
+                case "recuperarCuenta":
+                    recuperarCuenta(request, response);
+                    break;
+                default:
+                    response.sendRedirect("errorPagina.html");
+            }
     }
-}
 
-/**
- * Método encargado de validar el inicio de sesión de un usuario
- */
-private void validarLogin(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    
-    // Obtener parámetros del formulario
-    String nombreUsuario = request.getParameter("txtUsuario");
-    String password = request.getParameter("txtPassword");
-
-    // Crear el objeto Usuario y asignar valores
-    Usuarios usuario = new Usuarios();
-    usuario.setNombreUsuario(nombreUsuario);
-    usuario.setContraseña(password);
-
-    // Ejecutar el método Loggin para validar credenciales
-    int userId = Loggin(usuario);
-
-    if (userId > 0) {
-        // Inicio de sesión exitoso → crear sesión
-        HttpSession session = request.getSession();
-        session.setAttribute("idUsuario", userId);
-        session.setAttribute("nombreUsuario", nombreUsuario);
-
-        // Redirigir al menú principal o página de inicio
-        response.sendRedirect("ControladorPrincipal?accion=listar");
-
-    } 
-    else {
-        // Usuario o contraseña incorrectos → regresar al login con mensaje
-        request.setAttribute("mensajeError", "Usuario o contraseña incorrectos");
-        request.getRequestDispatcher("login.jsp").forward(request, response);
-    }
-}
-
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-    
     private void registrarUsuario(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         String nombreCompleto = request.getParameter("txtNombre");
@@ -147,99 +96,68 @@ private void validarLogin(HttpServletRequest request, HttpServletResponse respon
         String direccion = request.getParameter("txtDireccion");
         String correo = request.getParameter("txtEmail");
         String contraseña = request.getParameter("txtPassword");
-        
-        try (Connection con = cn.conexion()) {
-            String sql = "INSERT INTO Usuarios (nombreCompleto, nombreUsuario, direccion, correo, contraseña, rool) "
-                       + "VALUES (?, ?, ?, ?, ?, 'cliente')";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setString(1, nombreCompleto);
-            ps.setString(2, nombreUsuario);
-            ps.setString(3, direccion);
-            ps.setString(4, correo);
-            ps.setString(5, contraseña);
-            int filas = ps.executeUpdate();
-            if (filas > 0) {
-                response.sendRedirect("InicioSesion.html?registro=ok");
-                gmail.enviarCorreo(correo, "Bienvenido a nuestra tienda online de paneles solares", "gracias por registrarse en nuestra pagina, atentos a notifiaciones");
-                cn.desconectar();
-            } else {
-                response.sendRedirect("registro.html?error=1");
-                cn.desconectar();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            response.sendRedirect("registro.html?error=2");
+
+        Usuarios nuevo = new Usuarios(null, nombreCompleto, nombreUsuario, direccion, correo, contraseña, null);
+
+        if (usuarioDAO.registrarUsuario(nuevo)) {
+            servicioGmail.enviarCorreoAsync(
+                    correo,
+                    "Bienvenido a nuestra tienda online de paneles solares",
+                    "Gracias por registrarse en nuestra página. ¡Esté atento a nuestras notificaciones!"
+            );
+            response.sendRedirect("index.html");
+        } else {
+            response.sendRedirect("registro.html?error=1");
         }
     }
     
-       private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
+    private void validarLogin(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         String nombreUsuario = request.getParameter("txtUsuario");
-        Connection con = cn.conexion();
-        if (con == null) {
-            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
-            request.getRequestDispatcher("InicioSesion.html").forward(request, response);
-            return;
-        }
-        String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)){
-            ps.setString(1, nombreUsuario);
-            try(ResultSet rs = ps.executeQuery()){
-                if(rs.next()){
-                    String correo = rs.getString("correo");
-                    String contra = rs.getString("contraseña");
-                    response.sendRedirect("InicioSesion.html");
-                    gmail.enviarCorreo(correo, "recuperar contraseña", "la contraseña es: " + contra + " porfavor, que no se te olvide");
-                    cn.desconectar();
-                }else{
-                    request.setAttribute("mensajeError", "No existe este usuario");
-                    request.getRequestDispatcher("recuperar.html").forward(request, response);
-                    cn.desconectar();
-                }
-            }
-        } catch (SQLException e) {
-            throw new ServletException("Error al intentar recuperar contraseña: " + e.getMessage(), e);
-        } 
-    }
-    
-    // METODOS DE ENCRIPTACION
-    // Método para encriptar la contraseña usando BCrypt
-    private String hashPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt());
-    }
-
-    // Método para verificar la contraseña (al hacer login)
-    public boolean verifyPassword(String password, String storedHashedPassword) {
-        return BCrypt.checkpw(password, storedHashedPassword);
-    }
-   //LOGIN
-    // Método para verificar usuario y contraseña usando el procedimiento almacenado
-    // Método para verificar el login
-    public int Loggin(Usuarios usuario) {
-        int userId = -1;
+        String password = request.getParameter("txtPassword");
 
         try {
-            Connection con = cn.conexion();
-            CallableStatement stmt = con.prepareCall("{CALL SP_Loggin(?)}");
-            stmt.setString(1, usuario.getNombreUsuario());
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String hashedPassword = rs.getString("CONTRASEÑA");
-
-                // Verificar si la contraseña ingresada coincide con el hash almacenado
-                if (BCrypt.checkpw(usuario.getContraseña(), hashedPassword)) {
-                    userId = rs.getInt("ID"); // Retorna el ID del usuario
-                    System.out.println("Loggin Exitoso");
-                }
+            Usuarios usuario = usuarioDAO.validarLogin(nombreUsuario, password);
+            if (usuario != null) {
+                HttpSession sesion = request.getSession();
+                sesion.setAttribute("usuario", usuario);
+                response.sendRedirect("index.html");
+            } else {
+                request.setAttribute("mensajeError", "Usuario o contraseña incorrectos.");
+                request.getRequestDispatcher("InicioSesion.html").forward(request, response);
             }
-
-            rs.close();
-            stmt.close();
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error en login: " + e.getMessage());
+            throw new ServletException("Error al validar usuario", e);
         }
+    }
+    
+    private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        String nombreUsuario = request.getParameter("txtUsuario");
+        try {
+            Usuarios usuario = usuarioDAO.obtenerUsuario(nombreUsuario);
 
-        return userId; // Retorna -1 si no se encontró el usuario o la contraseña no es válida
+            if (usuario != null) {
+                String correo = usuario.getCorreo();
+                String contrasena = usuario.getContraseña();
+                servicioGmail.enviarCorreoAsync(
+                    correo, 
+                    "Recuperación de Contraseña", 
+                    "Tu contraseña es: " + contrasena + ". Por favor, no la olvides."
+                );
+                response.sendRedirect("InicioSesion.html?recuperacion=success"); 
+            } else {
+                request.setAttribute("mensajeError", "No existe este usuario.");
+                request.getRequestDispatcher("recuperar.html").forward(request, response);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error de BD al recuperar cuenta: " + e.getMessage());
+            request.setAttribute("mensajeError", "Error interno al procesar la solicitud de recuperación.");
+            request.getRequestDispatcher("recuperar.html").forward(request, response);
+
+        } catch (ServletException | IOException e) {
+            throw new ServletException("Error durante la recuperación de cuenta: " + e.getMessage(), e);
+        }
     }
 }
