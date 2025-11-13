@@ -68,7 +68,7 @@ public class ControladorPrincipal extends HttpServlet {
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            System.err.println("❌ Error al listar productos: " + e.getMessage());
+            System.err.println("Error al listar productos: " + e.getMessage());
         }
 
         request.setAttribute("productos", lista);
@@ -90,15 +90,15 @@ public class ControladorPrincipal extends HttpServlet {
 
             try {
                 stmt.execute();
-                request.setAttribute("mensaje", "✅ Producto agregado correctamente al carrito.");
+                request.setAttribute("mensaje", "Producto agregado correctamente al carrito.");
             } catch (SQLException ex) {
-                request.setAttribute("mensaje", "⚠️ " + ex.getMessage());
+                request.setAttribute("mensaje", ex.getMessage());
             }
 
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("mensaje", "❌ Error al agregar producto al carrito: " + e.getMessage());
+            request.setAttribute("mensaje", "Error al agregar producto al carrito: " + e.getMessage());
         }
 
         listarProductos(request, response);

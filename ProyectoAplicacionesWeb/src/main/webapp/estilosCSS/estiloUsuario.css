@@ -27,26 +27,32 @@ body {
     border-radius: 8px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.4);
     width: 90%;
-    max-width: 400px; 
+    max-width: 400px;
     color: white;
     position: relative;
     padding-top: 4rem;
 }
 
-.login-container h1 { text-align: center; margin-top: 0; color: #eee; }
+.login-container h1 {
+    text-align: center;
+    margin-top: 0;
+    color: #eee;
+}
 
 .form-group {
     margin-bottom: 1.5rem;
 }
 
 .form-group label { 
-    display: block; margin-bottom: 5px; color: #bbb; 
+    display: block;
+    margin-bottom: 5px;
+    color: #bbb;
 }
 
 .form-group input {
     width: 100%;
     padding: 10px;
-    box-sizing: border-box; 
+    box-sizing: border-box;
     border: none;
     border-bottom: 1px solid #555;
     background-color: transparent;
@@ -63,7 +69,7 @@ body {
     padding: 12px;
     background-color: #e50914;
     color: white;
-    border: none ;
+    border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
@@ -94,6 +100,34 @@ body {
 
 @media (min-width: 768px) {
     .login-container {
-        width: 350px; 
+        width: 350px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        width: 95%;
+        max-width: none;
+        padding: 1.5rem;
+        padding-top: 3rem;
+        border-radius: 6px;
+    }
+
+    .login-container h1 {
+        font-size: 1.4rem;
+    }
+
+    .form-group input {
+        padding: 8px;
+        font-size: 0.95rem;
+    }
+
+    .btn {
+        padding: 10px;
+        font-size: 1rem;
+    }
+
+    body {
+        font-size: 18px; 
     }
 }

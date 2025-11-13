@@ -8,8 +8,6 @@ import Modelo.Conexiones.ConexionMySQL;
 import Modelo.Entidades.Usuarios;
 import Servicios.ServicioIncriptador;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 
@@ -50,9 +48,6 @@ public class UsuarioDAO {
                 if (rs.next()) {
                     String nombreUsuarioDesencriptado = ServicioIncriptador.desencriptar(rs.getString("nombreUsuario"));
                     String contraseñaDesencriptada = ServicioIncriptador.desencriptar(rs.getString("contraseña"));
-                    System.out.println("Comparando:");
-                    System.out.println("Ingresado usuario: " + nombreUsuario + " | BD: " + nombreUsuarioDesencriptado);
-                    System.out.println("Ingresado pass: " + password + " | BD: " + contraseñaDesencriptada);
                     if (nombreUsuario.equals(nombreUsuarioDesencriptado) && password.equals(contraseñaDesencriptada)) {
                         return new Usuarios(
                             rs.getString("id"),
