@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperar cuenta</title>
+    <link rel="stylesheet" type="text/css" href="./estilosCSS/estiloUsuario.css">
+</head>
+<body>
+    <div class="background-blur"></div>
+    <div class="login-container">
+        <h1>Recuperar cuenta</h1>
+         <form action="ControladorUsuario" method="POST">
+            <input type="hidden" name="accion" value="recuperarCuenta">
+            <div class="form-group">
+                <label for="usuario">Nombre de Usuario</label>
+                <input type="text" id="usuario" name="txtUsuario" placeholder="Ingresa un nombre de usuario" pattern="[a-zA-Z0-9._%+-]+" required>
+            </div>
+            <p>Te enviaremos un enlace para restablecer tu contraseña.</p>
+            <button type="submit" class="btn">Enviar enlace</button>
+        </form>
+
+        <div class="links-adicionales">
+            <a href="InicioSesion.html">Regresar a la página anterior</a>
+        </div>
+    </div>
+</body>
+</html>

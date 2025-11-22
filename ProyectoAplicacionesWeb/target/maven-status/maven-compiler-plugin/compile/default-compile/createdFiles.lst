@@ -1,0 +1,15 @@
+Modelo\Conexiones\ConexionEmail.class
+itson\edu\mx\proyectoaplicacionesweb\resources\JakartaEE10Resource.class
+Modelo\Conexiones\PruebaEmail.class
+Controlador\ControladorUsuario.class
+Servicios\ServicioGmail.class
+Controlador\ControladorCarrito.class
+Modelo\Entidades\Usuarios.class
+Modelo\Entidades\Productos.class
+Servicios\ServicioHashContraseña.class
+itson\edu\mx\proyectoaplicacionesweb\JakartaRestConfiguration.class
+Modelo\Conexiones\ConexionMySQL.class
+Controlador\ControladorPrincipal.class
+Modelo\Conexiones\ConexionEmail$1.class
+Modelo\DAO\UsuarioDAO.class
+Servicios\ServicioIncriptador.class

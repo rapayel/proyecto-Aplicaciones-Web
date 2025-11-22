@@ -52,6 +52,11 @@ public class Usuarios {
         this.imagenPerfil = imagenPerfil;
     }
 
+    public Usuarios(String nombreUsuario, String contraseña) {
+        this.nombreUsuario = nombreUsuario;
+        this.contraseña = contraseña;
+    }
+
     public String getId() {
         return id;
     }

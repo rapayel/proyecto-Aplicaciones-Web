@@ -6,101 +6,93 @@ package Modelo.DAO;
 
 import Modelo.Conexiones.ConexionMySQL;
 import Modelo.Entidades.Usuarios;
-import Servicios.ServicioIncriptador;
+import Servicios.ServicioGmail;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import javax.swing.JOptionPane;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * 
  * @author lagar
  */
 public class UsuarioDAO {
-    private final ConexionMySQL conexion = new ConexionMySQL();
+    private final ConexionMySQL cn = new ConexionMySQL();
+    private final  ServicioGmail  gmail= new ServicioGmail();
+
+
         
-    public boolean registrarUsuario(Usuarios usuario) {
-        String sql = "INSERT INTO Usuarios (nombreCompleto, nombreUsuario, direccion, correo, contraseña) VALUES (?, ?, ?, ?, ?)";
-        try (Connection con = conexion.conexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ServicioIncriptador aes = new ServicioIncriptador();
-
-            ps.setString(1, aes.encriptado(usuario.getNombreCompleto()));
-            ps.setString(2, aes.encriptado(usuario.getNombreUsuario()));
-            ps.setString(3, aes.encriptado(usuario.getDireccion()));
-            ps.setString(4, aes.encriptado(usuario.getCorreo()));
-            ps.setString(5, aes.encriptado(usuario.getContraseña()));
-            ps.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+       private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        String nombreUsuario = request.getParameter("txtUsuario");
+        Connection con = cn.conexion();
+        if (con == null) {
+            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
+            request.getRequestDispatcher("InicioSesion.html").forward(request, response);
+            return;
         }
-   }   
-
-    public Usuarios validarLogin(String nombreUsuario, String password) throws SQLException {
         String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ?";
-
-        try (Connection con = conexion.conexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, ServicioIncriptador.encriptado(nombreUsuario));
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String nombreUsuarioDesencriptado = ServicioIncriptador.desencriptar(rs.getString("nombreUsuario"));
-                    String contraseñaDesencriptada = ServicioIncriptador.desencriptar(rs.getString("contraseña"));
-                    System.out.println("Comparando:");
-                    System.out.println("Ingresado usuario: " + nombreUsuario + " | BD: " + nombreUsuarioDesencriptado);
-                    System.out.println("Ingresado pass: " + password + " | BD: " + contraseñaDesencriptada);
-                    if (nombreUsuario.equals(nombreUsuarioDesencriptado) && password.equals(contraseñaDesencriptada)) {
-                        return new Usuarios(
-                            rs.getString("id"),
-                            rs.getString("nombreCompleto"),
-                            nombreUsuarioDesencriptado,
-                            rs.getString("direccion"),
-                            rs.getString("correo"),
-                            contraseñaDesencriptada,
-                            rs.getString("imagenPerfil")
-                        );
-                    }
+        try (PreparedStatement ps = con.prepareStatement(sql)){
+            ps.setString(1, nombreUsuario);
+            try(ResultSet rs = ps.executeQuery()){
+                if(rs.next()){
+                    String correo = rs.getString("correo");
+                    String contra = rs.getString("contraseña");
+                    response.sendRedirect("InicioSesion.html");
+                    gmail.enviarCorreoAsync(correo, "recuperar contraseña", "la contraseña es: " + contra + " porfavor, que no se te olvide");
+                    cn.desconectar();
+                }else{
+                    request.setAttribute("mensajeError", "No existe este usuario");
+                    request.getRequestDispatcher("recuperar.html").forward(request, response);
+                    cn.desconectar();
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al validar login: " + e.getMessage());
-            throw e;
-        }
-        return null; 
+            throw new ServletException("Error al intentar recuperar contraseña: " + e.getMessage(), e);
+        } 
+    }
+    
+    // METODOS DE ENCRIPTACION
+    // Método para encriptar la contraseña usando BCrypt
+    private String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
+    // Método para verificar la contraseña (al hacer login)
+    public boolean verifyPassword(String password, String storedHashedPassword) {
+        return BCrypt.checkpw(password, storedHashedPassword);
+    }
+   //LOGIN
+    // Método para verificar usuario y contraseña usando el procedimiento almacenado
+    // Método para verificar el login
+    public int Loggin(Usuarios usuario) {
+        int userId = -1;
 
-    
-    public Usuarios obtenerUsuario(String nombreUsuario) throws SQLException {
-        String sql = "SELECT correo, contraseña FROM Usuarios WHERE nombreUsuario = ?";
-        
-        try (Connection con = conexion.conexion();
-            PreparedStatement ps = con.prepareStatement(sql)) {
-            ServicioIncriptador aes = new ServicioIncriptador();
-            String nombreUsuarioEncriptado = aes.encriptado(nombreUsuario); 
-            ps.setString(1, nombreUsuarioEncriptado);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String correoEncriptado = rs.getString("correo");
-                    String contrasenaEncriptada = rs.getString("contraseña");
-                    String correoDesencriptado = aes.desencriptar(correoEncriptado);
-                    String contrasenaDesencriptada = aes.desencriptar(contrasenaEncriptada);
-                    Usuarios usuario = new Usuarios(); 
-                    usuario.setCorreo(correoDesencriptado); 
-                    usuario.setContraseña(contrasenaDesencriptada);      
-                    return usuario;
+        try {
+            Connection con = cn.conexion();
+            CallableStatement stmt = con.prepareCall("{CALL SP_Loggin(?)}");
+            stmt.setString(1, usuario.getNombreUsuario());
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String hashedPassword = rs.getString("CONTRASEÑA");
+
+                // Verificar si la contraseña ingresada coincide con el hash almacenado
+                if (BCrypt.checkpw(usuario.getContraseña(), hashedPassword)) {
+                    userId = rs.getInt("ID"); // Retorna el ID del usuario
+                    System.out.println("Loggin Exitoso");
                 }
             }
+
+            rs.close();
+            stmt.close();
         } catch (SQLException e) {
-            System.err.println("Error de BD al buscarUsuarioParaRecuperacion: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Error de encriptación al buscarUsuarioParaRecuperacion: " + e.getMessage());
-            throw new SQLException("Error de datos o seguridad durante la búsqueda de la cuenta.", e);
+            JOptionPane.showMessageDialog(null, "Error en login: " + e.getMessage());
         }
-        return null;
+
+        return userId; // Retorna -1 si no se encontró el usuario o la contraseña no es válida
     }
 }

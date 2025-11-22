@@ -6,7 +6,6 @@ package Controlador;
 
 
 import Modelo.DAO.UsuarioDAO;
-import Modelo.Entidades.Usuarios;
 import Servicios.ServicioGmail;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,7 +15,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.sql.SQLException;
+import Modelo.Entidades.Usuarios;
 
 /**
  *
@@ -76,12 +75,12 @@ public class ControladorUsuario extends HttpServlet {
             case "validarLogin":
                 validarLogin(request, response);
                 break;
-            case "registrarUsuario":
-                registrarUsuario(request, response);
-                break;
-            case "recuperarCuenta":
-                recuperarCuenta(request, response);
-                break;
+//            case "registrarUsuario":
+//                registrarUsuario(request, response);
+//                break;
+//            case "recuperarCuenta":
+//                recuperarCuenta(request, response);
+//                break;
             default:
                 response.sendRedirect("errorPagina.html");
         }
@@ -97,76 +96,91 @@ public class ControladorUsuario extends HttpServlet {
         return "Short description";
     }// </editor-fold>
     
-    private void registrarUsuario(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String nombreCompleto = request.getParameter("txtNombre");
-        String nombreUsuario = request.getParameter("txtUsuario");
-        String direccion = request.getParameter("txtDireccion");
-        String correo = request.getParameter("txtEmail");
-        String contraseña = request.getParameter("txtPassword");
-
-        Usuarios nuevo = new Usuarios(null, nombreCompleto, nombreUsuario, direccion, correo, contraseña, null);
-
-        if (usuarioDAO.registrarUsuario(nuevo)) {
-            servicioGmail.enviarCorreoAsync(
-                    correo,
-                    "Bienvenido a nuestra tienda online de paneles solares",
-                    "Gracias por registrarse en nuestra página. ¡Esté atento a nuestras notificaciones!"
-            );
-            response.sendRedirect("index.html");
-        } else {
-            response.sendRedirect("registro.html?error=1");
-        }
-    }
+//    private void registrarUsuario(HttpServletRequest request, HttpServletResponse response)
+//            throws IOException, ServletException {
+//        String nombreCompleto = request.getParameter("txtNombre");
+//        String nombreUsuario = request.getParameter("txtUsuario");
+//        String direccion = request.getParameter("txtDireccion");
+//        String correo = request.getParameter("txtEmail");
+//        String contraseña = request.getParameter("txtPassword");
+//
+//        Usuarios nuevo = new Usuarios(null, nombreCompleto, nombreUsuario, direccion, correo, contraseña, null);
+//
+//        if (usuarioDAO.registrarUsuario(nuevo)) {
+//            servicioGmail.enviarCorreoAsync(
+//                    correo,
+//                    "Bienvenido a nuestra tienda online de paneles solares",
+//                    "Gracias por registrarse en nuestra página. ¡Esté atento a nuestras notificaciones!"
+//            );
+//            response.sendRedirect("index.html");
+//        } else {
+//            response.sendRedirect("registro.html?error=1");
+//        }
+//    }
     
-    private void validarLogin(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String nombreUsuario = request.getParameter("txtUsuario");
-        String password = request.getParameter("txtPassword");
-
-        try {
-            Usuarios usuario = usuarioDAO.validarLogin(nombreUsuario, password);
-            if (usuario != null) {
-                HttpSession sesion = request.getSession();
-                sesion.setAttribute("usuario", usuario);
-                response.sendRedirect("index.html");
-            } else {
-                request.setAttribute("mensajeError", "Usuario o contraseña incorrectos.");
-                request.getRequestDispatcher("InicioSesion.html").forward(request, response);
-            }
-        } catch (SQLException e) {
-            throw new ServletException("Error al validar usuario", e);
-        }
-    }
+    /**
+ * Método encargado de validar el inicio de sesión de un usuario
+ */
+private void validarLogin(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
     
-    private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String nombreUsuario = request.getParameter("txtUsuario");
-        try {
-            Usuarios usuario = usuarioDAO.obtenerUsuario(nombreUsuario);
+    // Obtener parámetros del formulario
+    String nombreUsuario = request.getParameter("txtUsuario");
+    String password = request.getParameter("txtPassword");
 
-            if (usuario != null) {
-                String correo = usuario.getCorreo();
-                String contrasena = usuario.getContraseña();
-                servicioGmail.enviarCorreoAsync(
-                    correo, 
-                    "Recuperación de Contraseña", 
-                    "Tu contraseña es: " + contrasena + ". Por favor, no la olvides."
-                );
-                response.sendRedirect("InicioSesion.html?recuperacion=success"); 
-            } else {
-                request.setAttribute("mensajeError", "No existe este usuario.");
-                request.getRequestDispatcher("recuperar.html").forward(request, response);
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Error de BD al recuperar cuenta: " + e.getMessage());
-            request.setAttribute("mensajeError", "Error interno al procesar la solicitud de recuperación.");
-            request.getRequestDispatcher("recuperar.html").forward(request, response);
+    // Crear el objeto Usuario y asignar valores
+    Usuarios usuario = new Usuarios();
+    usuario.setNombreUsuario(nombreUsuario);
+    usuario.setContraseña(password);
 
-        } catch (ServletException | IOException e) {
-            throw new ServletException("Error durante la recuperación de cuenta: " + e.getMessage(), e);
-        }
+    // Ejecutar el método Loggin para validar credenciales
+    int userId = usuarioDAO.Loggin(usuario);
+
+    if (userId > 0) {
+        // Inicio de sesión exitoso → crear sesión
+        HttpSession session = request.getSession();
+        session.setAttribute("idUsuario", userId);
+        session.setAttribute("nombreUsuario", nombreUsuario);
+
+        // Redirigir al menú principal o página de inicio
+        response.sendRedirect("ControladorPrincipal?accion=listar");
+
+    } 
+    else {
+        // Usuario o contraseña incorrectos → regresar al login con mensaje
+        request.setAttribute("mensajeError", "Usuario o contraseña incorrectos");
+        request.getRequestDispatcher("login.jsp").forward(request, response);
     }
+}
+//    
+//    private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
+//            throws IOException, ServletException {
+//        String nombreUsuario = request.getParameter("txtUsuario");
+//        try {
+//            Usuarios usuario = usuarioDAO.obtenerUsuario(nombreUsuario);
+//
+//            if (usuario != null) {
+//                String correo = usuario.getCorreo();
+//                String contrasena = usuario.getContraseña();
+//                servicioGmail.enviarCorreoAsync(
+//                    correo, 
+//                    "Recuperación de Contraseña", 
+//                    "Tu contraseña es: " + contrasena + ". Por favor, no la olvides."
+//                );
+//                response.sendRedirect("InicioSesion.html?recuperacion=success"); 
+//            } else {
+//                request.setAttribute("mensajeError", "No existe este usuario.");
+//                request.getRequestDispatcher("recuperar.html").forward(request, response);
+//            }
+//            
+//        } catch (SQLException e) {
+//            System.err.println("Error de BD al recuperar cuenta: " + e.getMessage());
+//            request.setAttribute("mensajeError", "Error interno al procesar la solicitud de recuperación.");
+//            request.getRequestDispatcher("recuperar.html").forward(request, response);
+//
+//        } catch (ServletException | IOException e) {
+//            throw new ServletException("Error durante la recuperación de cuenta: " + e.getMessage(), e);
+//        }
+//    }
 
 }

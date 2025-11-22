@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Registrarse</title>
+    <link rel="stylesheet" type="text/css" href="./estilosCSS/estiloUsuario.css">
+</head>
+<body>
+    <div class="background-blur"></div>
+    <div class="login-container">
+        <h1>Registro</h1>
+        <form action="ControladorUsuario" method="POST">
+            <input type="hidden" name="accion" value="registrarUsuario">
+            <div class="form-group">
+                <label for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" name="txtNombre" placeholder="Ingresa un nombre completo" required>
+            </div>
+            <div class="form-group">
+                <label for="usuario">Nombre de Usuario</label>
+                <input type="text" id="usuario" name="txtUsuario" placeholder="Ingresa un nombre de usuario" pattern="[a-zA-Z0-9._%+-]+" required>
+            </div>
+            <div class="form-group">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" name="txtDireccion" placeholder="Ingresa una dirección" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Correo Electrónico (ejemplo@gmail.com)</label>
+                <input type="email" id="email" name="txtEmail" placeholder="ejemplo@gmail.com" pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña (mínimo 12 caracteres, letras, números y símbolos)</label>
+                <input type="password" id="password" name="txtPassword" placeholder="Ingresa una contraseña" pattern="^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{12,}$" required>
+            </div>
+            <button type="submit" class="btn">Registrarme</button>
+        </form>
+    </div>
+</body>
+</html>
