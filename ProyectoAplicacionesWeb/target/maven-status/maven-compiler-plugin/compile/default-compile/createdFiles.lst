@@ -4,6 +4,7 @@ Modelo\Conexiones\PruebaEmail.class
 Controlador\ControladorUsuario.class
 Servicios\ServicioGmail.class
 Controlador\ControladorCarrito.class
+Modelo\DAO\ProductosDAO.class
 Modelo\Entidades\Usuarios.class
 Modelo\Entidades\Productos.class
 Servicios\ServicioHashContraseña.class

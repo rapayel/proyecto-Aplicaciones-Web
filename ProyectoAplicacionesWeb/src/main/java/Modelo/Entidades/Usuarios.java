@@ -22,7 +22,8 @@ public class Usuarios {
     public Usuarios() {
     }
 
-    public Usuarios(String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña) {
+    public Usuarios(String id,String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña) {
+        this.id = id;
         this.nombreCompleto = nombreCompleto;
         this.nombreUsuario = nombreUsuario;
         this.direccion = direccion;
@@ -56,6 +57,7 @@ public class Usuarios {
         this.nombreUsuario = nombreUsuario;
         this.contraseña = contraseña;
     }
+    
 
     public String getId() {
         return id;

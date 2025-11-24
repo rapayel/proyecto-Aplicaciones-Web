@@ -7,10 +7,6 @@ package Modelo.DAO;
 import Modelo.Conexiones.ConexionMySQL;
 import Modelo.Entidades.Usuarios;
 import Servicios.ServicioGmail;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.sql.*;
 import javax.swing.JOptionPane;
 import org.mindrot.jbcrypt.BCrypt;
@@ -22,38 +18,44 @@ import org.mindrot.jbcrypt.BCrypt;
 public class UsuarioDAO {
     private final ConexionMySQL cn = new ConexionMySQL();
     private final  ServicioGmail  gmail= new ServicioGmail();
+    private Connection conexion;
+
+    public UsuarioDAO() {
+        ConexionMySQL cn = new ConexionMySQL();
+        this.conexion = cn.conexion();
+    }
 
 
         
-       private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String nombreUsuario = request.getParameter("txtUsuario");
-        Connection con = cn.conexion();
-        if (con == null) {
-            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
-            request.getRequestDispatcher("InicioSesion.html").forward(request, response);
-            return;
-        }
-        String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)){
-            ps.setString(1, nombreUsuario);
-            try(ResultSet rs = ps.executeQuery()){
-                if(rs.next()){
-                    String correo = rs.getString("correo");
-                    String contra = rs.getString("contraseña");
-                    response.sendRedirect("InicioSesion.html");
-                    gmail.enviarCorreoAsync(correo, "recuperar contraseña", "la contraseña es: " + contra + " porfavor, que no se te olvide");
-                    cn.desconectar();
-                }else{
-                    request.setAttribute("mensajeError", "No existe este usuario");
-                    request.getRequestDispatcher("recuperar.html").forward(request, response);
-                    cn.desconectar();
-                }
-            }
-        } catch (SQLException e) {
-            throw new ServletException("Error al intentar recuperar contraseña: " + e.getMessage(), e);
-        } 
-    }
+//       private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
+//            throws IOException, ServletException {
+//        String nombreUsuario = request.getParameter("txtUsuario");
+//        Connection con = cn.conexion();
+//        if (con == null) {
+//            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
+//            request.getRequestDispatcher("InicioSesion.html").forward(request, response);
+//            return;
+//        }
+//        String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ?";
+//        try (PreparedStatement ps = con.prepareStatement(sql)){
+//            ps.setString(1, nombreUsuario);
+//            try(ResultSet rs = ps.executeQuery()){
+//                if(rs.next()){
+//                    String correo = rs.getString("correo");
+//                    String contra = rs.getString("contraseña");
+//                    response.sendRedirect("InicioSesion.html");
+//                    gmail.enviarCorreoAsync(correo, "recuperar contraseña", "la contraseña es: " + contra + " porfavor, que no se te olvide");
+//                    cn.desconectar();
+//                }else{
+//                    request.setAttribute("mensajeError", "No existe este usuario");
+//                    request.getRequestDispatcher("recuperar.html").forward(request, response);
+//                    cn.desconectar();
+//                }
+//            }
+//        } catch (SQLException e) {
+//            throw new ServletException("Error al intentar recuperar contraseña: " + e.getMessage(), e);
+//        } 
+//    }
     
     // METODOS DE ENCRIPTACION
     // Método para encriptar la contraseña usando BCrypt
@@ -95,4 +97,29 @@ public class UsuarioDAO {
 
         return userId; // Retorna -1 si no se encontró el usuario o la contraseña no es válida
     }
+    
+public boolean crearUsuario(Usuarios usuario) {
+
+    String sql = "{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}";
+
+    try {
+            CallableStatement stmt = conexion.prepareCall("{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}");
+
+            stmt.setString(1, usuario.getNombreCompleto());
+            stmt.setString(2, usuario.getNombreUsuario());
+            stmt.setString(3, usuario.getDireccion());
+            stmt.setString(4, usuario.getCorreo());
+            stmt.setString(5, hashPassword(usuario.getContraseña())); // Encriptación
+            stmt.setString(6, "CLIENTE");
+            stmt.execute();
+    return true;    
+    } catch (SQLException e) {
+        System.out.println("Error DAO crearUsuario: " + e.getMessage());
+        return false;
+    }
+    
+}
+
+
+    
 }

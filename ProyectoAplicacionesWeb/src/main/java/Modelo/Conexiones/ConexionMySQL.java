@@ -5,6 +5,7 @@
 package Modelo.Conexiones;
 
 import java.awt.HeadlessException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -67,4 +68,6 @@ public class ConexionMySQL {
         }
         return estado;
     }
+
+  
 }

@@ -75,12 +75,11 @@ public class ControladorUsuario extends HttpServlet {
             case "validarLogin":
                 validarLogin(request, response);
                 break;
-//            case "registrarUsuario":
-//                registrarUsuario(request, response);
-//                break;
-//            case "recuperarCuenta":
-//                recuperarCuenta(request, response);
-//                break;
+            case "registrarCliente":
+    registrarCliente(request, response);
+    break;
+
+
             default:
                 response.sendRedirect("errorPagina.html");
         }
@@ -152,35 +151,57 @@ private void validarLogin(HttpServletRequest request, HttpServletResponse respon
         request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 }
-//    
-//    private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
-//            throws IOException, ServletException {
-//        String nombreUsuario = request.getParameter("txtUsuario");
-//        try {
-//            Usuarios usuario = usuarioDAO.obtenerUsuario(nombreUsuario);
 //
-//            if (usuario != null) {
-//                String correo = usuario.getCorreo();
-//                String contrasena = usuario.getContraseña();
-//                servicioGmail.enviarCorreoAsync(
-//                    correo, 
-//                    "Recuperación de Contraseña", 
-//                    "Tu contraseña es: " + contrasena + ". Por favor, no la olvides."
-//                );
-//                response.sendRedirect("InicioSesion.html?recuperacion=success"); 
-//            } else {
-//                request.setAttribute("mensajeError", "No existe este usuario.");
-//                request.getRequestDispatcher("recuperar.html").forward(request, response);
-//            }
-//            
-//        } catch (SQLException e) {
-//            System.err.println("Error de BD al recuperar cuenta: " + e.getMessage());
-//            request.setAttribute("mensajeError", "Error interno al procesar la solicitud de recuperación.");
-//            request.getRequestDispatcher("recuperar.html").forward(request, response);
+//private void recuperarCuenta(HttpServletRequest request, HttpServletResponse response)
+//        throws ServletException, IOException {
 //
-//        } catch (ServletException | IOException e) {
-//            throw new ServletException("Error durante la recuperación de cuenta: " + e.getMessage(), e);
-//        }
+//    String nombreUsuario = request.getParameter("txtUsuario");
+//
+//    Usuarios usuario = usuarioDAO.buscarPorNombreUsuario(nombreUsuario);
+//
+//    if (usuario != null) {
+//        servicioGmail.enviarCorreoAsync(
+//                usuario.getCorreo(),
+//                "Recuperación de Cuenta",
+//                "Tu contraseña es: " + usuario.getContraseña()
+//        );
+//
+//        response.sendRedirect("InicioSesion.jsp?recuperacion=success");
+//
+//    } else {
+//        request.setAttribute("mensajeError", "No existe este usuario.");
+//        request.getRequestDispatcher("recuperar.jsp").forward(request, response);
 //    }
+//}
+private void registrarCliente(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+    String nombreCompleto = request.getParameter("txtNombreCompleto");
+    String nombreUsuario = request.getParameter("txtUsuario");
+    String direccion = request.getParameter("txtDireccion");
+    String correo = request.getParameter("txtCorreo");
+    String contrasena = request.getParameter("txtPassword");
+
+    Usuarios nuevo = new Usuarios();
+    nuevo.setNombreCompleto(nombreCompleto);
+    nuevo.setNombreUsuario(nombreUsuario);
+    nuevo.setDireccion(direccion);
+    nuevo.setCorreo(correo);
+    nuevo.setContraseña(contrasena);
+    nuevo.setRol("cliente");
+
+    boolean guardado = usuarioDAO.crearUsuario(nuevo);
+
+    if (guardado) {
+        // SOLO REDIRECCIONAR A PRINCIPAL
+        response.sendRedirect("InicioSesion.html");
+    } else {
+        request.setAttribute("mensajeError", "No se pudo registrar el usuario.");
+        request.getRequestDispatcher("Registrar.html").forward(request, response);
+    }
+}
+
+
+
 
 }
