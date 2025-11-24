@@ -1,9 +1,8 @@
 package Controlador;
 
-import Modelo.Conexiones.ConexionMySQL;
+import Modelo.DAO.ProductosDAO;
 import Modelo.Entidades.Productos;
 import java.io.IOException;
-import java.sql.*;
 import java.util.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,7 +10,8 @@ import jakarta.servlet.http.*;
 
 @WebServlet(name = "ControladorPrincipal", urlPatterns = {"/ControladorPrincipal"})
 public class ControladorPrincipal extends HttpServlet {
-    private final ConexionMySQL cn = new ConexionMySQL();
+
+    private final ProductosDAO productosDAO = new ProductosDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -24,6 +24,7 @@ public class ControladorPrincipal extends HttpServlet {
             case "listar":
                 listarProductos(request, response);
                 break;
+
             default:
                 listarProductos(request, response);
                 break;
@@ -35,6 +36,7 @@ public class ControladorPrincipal extends HttpServlet {
             throws ServletException, IOException {
 
         String accion = request.getParameter("accion");
+
         if ("agregarCarrito".equals(accion)) {
             agregarCarrito(request, response);
         } else {
@@ -42,39 +44,21 @@ public class ControladorPrincipal extends HttpServlet {
         }
     }
 
+    // ---------------------------------------------------------
+    // LISTAR PRODUCTOS
+    // ---------------------------------------------------------
     private void listarProductos(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<Productos> lista = new ArrayList<>();
-
-        try (Connection con = cn.conexion()) {
-            CallableStatement stmt = con.prepareCall("{CALL sp_listarProductos()}");
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Productos p = new Productos();
-                p.setId(rs.getInt("id"));
-                p.setProducto(rs.getString("producto"));
-                p.setMarca(rs.getString("marca"));
-                p.setModelo(rs.getString("modelo"));
-                p.setDescripcion(rs.getString("descripcion"));
-                p.setPrecio_compra(rs.getDouble("precioCompra"));
-                p.setPrecio_venta(rs.getDouble("precioVenta"));
-                p.setCantidad_Stock(rs.getInt("Cantidad_Stock"));
-                lista.add(p);
-            }
-
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println("❌ Error al listar productos: " + e.getMessage());
-        }
+        List<Productos> lista = productosDAO.listarProductos();
 
         request.setAttribute("productos", lista);
         request.getRequestDispatcher("Principal.jsp").forward(request, response);
     }
 
+    // ---------------------------------------------------------
+    // AGREGAR AL CARRITO
+    // ---------------------------------------------------------
     private void agregarCarrito(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -82,23 +66,12 @@ public class ControladorPrincipal extends HttpServlet {
         int idProducto = Integer.parseInt(request.getParameter("id"));
         int cantidadSolicitada = Integer.parseInt(request.getParameter("Cantidad_Stock"));
 
-        try (Connection con = cn.conexion()) {
-            CallableStatement stmt = con.prepareCall("{CALL sp_AgregarProductoCarrito(?,?,?)}");
-            stmt.setInt(1, idUsuario);
-            stmt.setInt(2, idProducto);
-            stmt.setInt(3, cantidadSolicitada);
+        boolean ok = productosDAO.agregarAlCarrito(idUsuario, idProducto, cantidadSolicitada);
 
-            try {
-                stmt.execute();
-                request.setAttribute("mensaje", "✅ Producto agregado correctamente al carrito.");
-            } catch (SQLException ex) {
-                request.setAttribute("mensaje", "⚠️ " + ex.getMessage());
-            }
-
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("mensaje", "❌ Error al agregar producto al carrito: " + e.getMessage());
+        if (ok) {
+            request.setAttribute("mensaje", "✅ Producto agregado correctamente al carrito.");
+        } else {
+            request.setAttribute("mensaje", "❌ Error al agregar el producto al carrito.");
         }
 
         listarProductos(request, response);

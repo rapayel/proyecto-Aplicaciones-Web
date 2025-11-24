@@ -4,13 +4,12 @@
  */
 package Controlador;
 
-import Modelo.Conexiones.ConexionMySQL;
+import Modelo.DAO.CarritoDAO;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import Modelo.Entidades.Productos;
 import java.io.IOException;
-import java.sql.*;
 import java.util.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,9 +18,12 @@ import jakarta.servlet.http.*;
  *
  * @author Arell
  */
+
+
 @WebServlet(name = "ControladorCarrito", urlPatterns = {"/ControladorCarrito"})
 public class ControladorCarrito extends HttpServlet {
-private final ConexionMySQL cn = new ConexionMySQL();
+
+    private final CarritoDAO carritoDAO = new CarritoDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -34,9 +36,11 @@ private final ConexionMySQL cn = new ConexionMySQL();
             case "verCarrito":
                 verCarrito(request, response);
                 break;
+
             case "eliminarProducto":
                 eliminarProducto(request, response);
                 break;
+
             default:
                 verCarrito(request, response);
                 break;
@@ -48,6 +52,7 @@ private final ConexionMySQL cn = new ConexionMySQL();
             throws ServletException, IOException {
 
         String accion = request.getParameter("accion");
+
         if ("finalizarCompra".equals(accion)) {
             finalizarCompra(request, response);
         } else {
@@ -55,117 +60,71 @@ private final ConexionMySQL cn = new ConexionMySQL();
         }
     }
 
+    // -------------------------------------------------------------
+    // VER CARRITO
+    // -------------------------------------------------------------
     private void verCarrito(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
         Object idObj = session.getAttribute("idUsuario");
+
         if (idObj == null) {
             response.sendRedirect("InicioSesion.html");
             return;
         }
 
         int idUsuario = (int) idObj;
-        List<Productos> carrito = new ArrayList<>();
-        double total = 0;
 
-        try (Connection con = cn.conexion()) {
-            String sql = """
-                SELECT p.id, p.producto, p.descripcion, p.precioVenta, pc.cantidad,
-                       (p.precioVenta * pc.cantidad) AS subtotal
-                FROM producto_carrito pc
-                JOIN carrito c ON c.id = pc.carrito_id
-                JOIN productos p ON p.id = pc.producto_id
-                WHERE c.usuario_id = ? AND pc.estado_reserva = 'ACTIVA';
-            """;
+        List<Productos> carrito = carritoDAO.obtenerCarrito(idUsuario);
 
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1, idUsuario);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Productos p = new Productos();
-                p.setId(rs.getInt("id"));
-                p.setProducto(rs.getString("producto"));
-                p.setDescripcion(rs.getString("descripcion"));
-                p.setPrecio_venta(rs.getDouble("precioVenta"));
-                p.setCantidad_Stock(rs.getInt("cantidad"));
-                total += p.getPrecio_venta() * p.getCantidad_Stock();
-                carrito.add(p);
-            }
-
-            rs.close();
-            ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println("❌ Error al listar carrito: " + e.getMessage());
-        }
+        double total = carrito.stream()
+                .mapToDouble(p -> p.getPrecio_venta() * p.getCantidad_Stock())
+                .sum();
 
         request.setAttribute("carrito", carrito);
         request.setAttribute("total", total);
+
         request.getRequestDispatcher("Carrito.jsp").forward(request, response);
     }
 
+    // -------------------------------------------------------------
+    // ELIMINAR PRODUCTO
+    // -------------------------------------------------------------
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int idProducto = Integer.parseInt(request.getParameter("idProducto"));
         HttpSession session = request.getSession();
         int idUsuario = (int) session.getAttribute("idUsuario");
 
-        try (Connection con = cn.conexion()) {
-            String sql = """
-                DELETE pc FROM producto_carrito pc
-                JOIN carrito c ON c.id = pc.carrito_id
-                WHERE c.usuario_id = ? AND pc.producto_id = ?;
-            """;
+        int idProducto = Integer.parseInt(request.getParameter("idProducto"));
 
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1, idUsuario);
-            ps.setInt(2, idProducto);
-            int filas = ps.executeUpdate();
+        boolean ok = carritoDAO.eliminarProducto(idUsuario, idProducto);
 
-            if (filas > 0)
-                request.setAttribute("mensaje", "Producto eliminado del carrito.");
-            else
-                request.setAttribute("mensaje", "No se encontró el producto en el carrito.");
-
-            ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("mensaje", "❌ Error al eliminar producto: " + e.getMessage());
+        if (ok) {
+            request.setAttribute("mensaje", "Producto eliminado del carrito.");
+        } else {
+            request.setAttribute("mensaje", "❌ No se pudo eliminar el producto.");
         }
 
         verCarrito(request, response);
     }
 
+    // -------------------------------------------------------------
+    // FINALIZAR COMPRA
+    // -------------------------------------------------------------
     private void finalizarCompra(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
         int idUsuario = (int) session.getAttribute("idUsuario");
 
-        try (Connection con = cn.conexion()) {
-            String sql = """
-                UPDATE producto_carrito pc
-                JOIN carrito c ON c.id = pc.carrito_id
-                SET pc.estado_reserva = 'FINALIZADA'
-                WHERE c.usuario_id = ? AND pc.estado_reserva = 'ACTIVA';
-            """;
+        boolean ok = carritoDAO.finalizarCompra(idUsuario);
 
-            PreparedStatement ps = con.prepareStatement(sql);
-            ps.setInt(1, idUsuario);
-            int filas = ps.executeUpdate();
-
-            if (filas > 0)
-                request.setAttribute("mensaje", "✅ Compra finalizada correctamente.");
-            else
-                request.setAttribute("mensaje", "⚠️ No había productos activos en el carrito.");
-
-            ps.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            request.setAttribute("mensaje", "❌ Error al finalizar compra: " + e.getMessage());
+        if (ok) {
+            request.setAttribute("mensaje", "✔ Compra finalizada correctamente.");
+        } else {
+            request.setAttribute("mensaje", "⚠ No había productos activos en el carrito.");
         }
 
         verCarrito(request, response);
