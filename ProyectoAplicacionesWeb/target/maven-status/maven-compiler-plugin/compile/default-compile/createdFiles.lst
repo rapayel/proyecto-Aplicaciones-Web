@@ -8,7 +8,7 @@ Controlador\ControladorCarrito.class
 Modelo\DAO\ProductosDAO.class
 Modelo\Entidades\Usuarios.class
 Modelo\Entidades\Productos.class
-Servicios\ServicioHashContraseña.class
+Servicios\ServicioHashContraseÃ±a.class
 itson\edu\mx\proyectoaplicacionesweb\JakartaRestConfiguration.class
 Modelo\Conexiones\ConexionMySQL.class
 Controlador\ControladorPrincipal.class
