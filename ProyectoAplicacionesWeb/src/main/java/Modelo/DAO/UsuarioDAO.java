@@ -97,7 +97,30 @@ public class UsuarioDAO {
 
         return userId; // Retorna -1 si no se encontró el usuario o la contraseña no es válida
     }
-    
+    public String obtenerRolPorId(int idUsuario) {
+    String rol = null;
+
+    try {
+        Connection con = cn.conexion();
+        CallableStatement stmt = con.prepareCall("{CALL sp_ObtenerRolPorId(?)}");
+        stmt.setInt(1, idUsuario);
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            rol = rs.getString("ROL");
+        }
+
+        rs.close();
+        stmt.close();
+        con.close();
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error obteniendo rol: " + e.getMessage());
+    }
+
+    return rol; // Puede regresar null si no existe
+}
+
 public boolean crearUsuario(Usuarios usuario) {
 
     String sql = "{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}";

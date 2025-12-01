@@ -136,13 +136,20 @@ private void validarLogin(HttpServletRequest request, HttpServletResponse respon
     int userId = usuarioDAO.Loggin(usuario);
 
     if (userId > 0) {
+         // 2. Obtener el ROL del usuario desde el SP
+        String rol = usuarioDAO.obtenerRolPorId(userId);
         // Inicio de sesión exitoso → crear sesión
         HttpSession session = request.getSession();
         session.setAttribute("idUsuario", userId);
         session.setAttribute("nombreUsuario", nombreUsuario);
+        session.setAttribute("rol", rol);
 
-        // Redirigir al menú principal o página de inicio
-        response.sendRedirect("ControladorPrincipal?accion=listar");
+        // 4. Redirección según ROL
+        if ("admin".equalsIgnoreCase(rol)) {
+            response.sendRedirect("PrincipalAdmin.jsp");
+        } else {
+            response.sendRedirect("ControladorPrincipal?accion=listar");
+        }
 
     } 
     else {

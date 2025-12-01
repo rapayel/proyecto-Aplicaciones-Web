@@ -6,9 +6,10 @@ Controlador\ControladorUsuario.class
 Servicios\ServicioGmail.class
 Controlador\ControladorCarrito.class
 Modelo\DAO\ProductosDAO.class
+Controlador\ControladorPrincipalAdmin.class
 Modelo\Entidades\Usuarios.class
 Modelo\Entidades\Productos.class
-Servicios\ServicioHashContraseÃ±a.class
+Servicios\ServicioHashContraseña.class
 itson\edu\mx\proyectoaplicacionesweb\JakartaRestConfiguration.class
 Modelo\Conexiones\ConexionMySQL.class
 Controlador\ControladorPrincipal.class
