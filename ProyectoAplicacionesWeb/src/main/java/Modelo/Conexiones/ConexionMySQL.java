@@ -4,11 +4,10 @@
  */
 package Modelo.Conexiones;
 
-import java.awt.HeadlessException;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
 import javax.swing.JOptionPane;
 
 /**
@@ -23,41 +22,48 @@ public class ConexionMySQL {
     public String contra = "root";
     public String driver = "com.mysql.jdbc.Driver";
     
-    Connection conexion = null;
-    
-    // Metodo para establecer la conexion con la BD
-    public Connection conexion(){
-        // Establecemos el intento de la conexion
+
+    private final String URL = "jdbc:mysql://localhost:3306/" + nombreBD 
+            + "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC&useSSL=false";
+
+    private Connection link = null;
+   
+    public Connection conectar() {
         try {
-            // Cargar los driver de la base de datos en tiempo real o dinámico
             Class.forName(driver);
-            // Establecer la conexion
-            conexion =  DriverManager.getConnection(url+"/"+nombreBD, usuario, contra);            
-            //Mostrar un mensaje en dado caso que la conexion sea correcta
-            /*JOptionPane.showMessageDialog(null,"Conexión Exitosa");*/
-        } catch (HeadlessException | ClassNotFoundException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Conexión fallida: " + e);
+            link = DriverManager.getConnection(url, usuario, contra);
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error Driver: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error Conexión: " + e.getMessage());
         }
-        return conexion;           
+        return link;
+    }
+
+    public Connection conexion() {
+        // Simplemente llamamos al método nuevo. Así ambos hacen lo mismo.
+        return this.conectar();
     }
     
-    public void desconectar(){
+    
+    public void desconectar() {
         try {
-            if(conexion!= null && !conexion.isClosed()){
-                conexion.close();                
+            if (link != null && !link.isClosed()) {
+                link.close();
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, e);
+            System.err.println("Error al cerrar: " + e.getMessage());
         }
-    } 
+    }
+
     
     public boolean verificarConexion() {
         boolean estado = false;
         try {
-            if (conexion == null || conexion.isClosed()) {
+            if (link == null || link.isClosed()) {
                 conexion(); // intenta conectar si no hay una conexión activa
             }
-            if (conexion != null && !conexion.isClosed()) {
+            if (link != null && !link.isClosed()) {
                 estado = true;
                 JOptionPane.showMessageDialog(null, "Conexión exitosa a la base de datos: " + nombreBD);
             } else {

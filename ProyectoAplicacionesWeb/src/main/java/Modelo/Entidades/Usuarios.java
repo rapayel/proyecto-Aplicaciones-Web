@@ -10,7 +10,7 @@ package Modelo.Entidades;
  */
 
 public class Usuarios {
-    private String id;
+    private int id;
     private String nombreCompleto;
     private String nombreUsuario;
     private String direccion;
@@ -22,7 +22,7 @@ public class Usuarios {
     public Usuarios() {
     }
 
-    public Usuarios(String id,String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña) {
+    public Usuarios(int id,String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña) {
         this.id = id;
         this.nombreCompleto = nombreCompleto;
         this.nombreUsuario = nombreUsuario;
@@ -31,7 +31,7 @@ public class Usuarios {
         this.contraseña = contraseña;
     }
 
-    public Usuarios(String id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña, String imagenPerfil) {
+    public Usuarios(int id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña, String imagenPerfil) {
         this.id = id;
         this.nombreCompleto = nombreCompleto;
         this.nombreUsuario = nombreUsuario;
@@ -42,7 +42,7 @@ public class Usuarios {
     }
     
     
-    public Usuarios(String id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña, String rol, String imagenPerfil) {
+    public Usuarios(int id, String nombreCompleto, String nombreUsuario, String direccion, String correo, String contraseña, String rol, String imagenPerfil) {
         this.id = id;
         this.nombreCompleto = nombreCompleto;
         this.nombreUsuario = nombreUsuario;
@@ -59,11 +59,11 @@ public class Usuarios {
     }
     
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
