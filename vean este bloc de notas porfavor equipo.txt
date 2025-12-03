@@ -1,4 +1,0 @@
-link que solo funciona se Luis Rafael Lagarda Encinas(yo) ejecuta el tomcat
-podra ejecutarlo normalmente pero mi tomcat tiene https y resive varios dispositivos,
-este link es para los que se unan:
-https://"ip actual":8443/ProyectoAplicacionesWeb/
