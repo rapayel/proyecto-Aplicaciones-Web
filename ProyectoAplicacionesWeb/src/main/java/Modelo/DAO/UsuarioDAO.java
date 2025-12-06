@@ -71,7 +71,6 @@ public class UsuarioDAO {
         return rol;
     }
 
-    // registro de usuarios normales (Clientes)
     public boolean crearUsuario(Usuarios usuario) {
         try (Connection con = cn.conexion();
              CallableStatement stmt = con.prepareCall("{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}")) {
@@ -81,7 +80,7 @@ public class UsuarioDAO {
             stmt.setString(3, usuario.getDireccion());
             stmt.setString(4, usuario.getCorreo());
             stmt.setString(5, hashPassword(usuario.getContraseña())); 
-            stmt.setString(6, "CLIENTE"); // Rol por defecto
+            stmt.setString(6, "CLIENTE"); // 
             
             stmt.execute();
             return true;
@@ -91,12 +90,9 @@ public class UsuarioDAO {
         }
     }
 
-    // MÉTODOS PARA EL CRUD DE ADMINISTRADOR
-
-    //  LISTAR TODOS LOS USUARIOS
     public List<Usuarios> listarUsuarios() {
         List<Usuarios> lista = new ArrayList<>();
-        String sql = "SELECT * FROM usuario"; // Nombre de tabla en singular según el SQL 
+        String sql = "SELECT * FROM usuario"; 
 
         try (Connection con = cn.conexion();
              PreparedStatement ps = con.prepareStatement(sql);

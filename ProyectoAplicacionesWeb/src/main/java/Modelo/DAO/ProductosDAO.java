@@ -48,7 +48,7 @@ public class ProductosDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error DAO listarProductos: " + e.getMessage());
+            System.out.println("Error DAO listarProductos: " + e.getMessage());
         }
 
         return lista;
@@ -72,9 +72,132 @@ public class ProductosDAO {
             return true;
 
         } catch (SQLException e) {
-            System.out.println("❌ Error DAO agregarAlCarrito: " + e.getMessage());
+            System.out.println("Error DAO agregarAlCarrito: " + e.getMessage());
             return false;
         }
+    }
+    
+    public boolean agregarProducto(Productos p) {
+        String sql = "INSagregarProductoERT INTO productos (producto, marca, modelo, descripcion, precioCompra, precioVenta, Cantidad_Stock) "
+                   + "VALUES (?,?,?,?,?,?,?)";
+
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, p.getProducto());
+            ps.setString(2, p.getMarca());
+            ps.setString(3, p.getModelo());
+            ps.setString(4, p.getDescripcion());
+            ps.setDouble(5, p.getPrecio_compra());
+            ps.setDouble(6, p.getPrecio_venta());
+            ps.setInt(7, p.getCantidad_Stock());
+
+            ps.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("Error DAO agregarProducto: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    public Productos buscarProducto(int id) {
+
+        Productos p = null;
+        String sql = "SELECT * FROM productos WHERE id=?";
+
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                p = new Productos();
+                p.setId(rs.getInt("id"));
+                p.setProducto(rs.getString("producto"));
+                p.setMarca(rs.getString("marca"));
+                p.setModelo(rs.getString("modelo"));
+                p.setDescripcion(rs.getString("descripcion"));
+                p.setPrecio_compra(rs.getDouble("precioCompra"));
+                p.setPrecio_venta(rs.getDouble("precioVenta"));
+                p.setCantidad_Stock(rs.getInt("Cantidad_Stock"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error DAO buscarProducto: " + e.getMessage());
+        }
+        return p;
+    }
+
+    public boolean actualizarProducto(Productos p) {
+
+        String sql = "UPDATE productos SET producto=?, marca=?, modelo=?, descripcion=?, "
+                   + "precioCompra=?, precioVenta=?, Cantidad_Stock=? WHERE id=?";
+
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, p.getProducto());
+            ps.setString(2, p.getMarca());
+            ps.setString(3, p.getModelo());
+            ps.setString(4, p.getDescripcion());
+            ps.setDouble(5, p.getPrecio_compra());
+            ps.setDouble(6, p.getPrecio_venta());
+            ps.setInt(7, p.getCantidad_Stock());
+            ps.setInt(8, p.getId());
+
+            ps.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("Error DAO actualizarProducto: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    public boolean eliminarProducto(int id) {
+
+        String sql = "DELETE FROM productos WHERE id=?";
+
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            System.out.println("Error DAO eliminarProducto: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    public List<Productos> listar() {
+
+        List<Productos> lista = new ArrayList<>();
+
+        String sql = "SELECT * FROM productos";
+
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Productos p = new Productos();
+                p.setId(rs.getInt("id"));
+                p.setProducto(rs.getString("producto"));
+                p.setMarca(rs.getString("marca"));
+                p.setModelo(rs.getString("modelo"));
+                p.setDescripcion(rs.getString("descripcion"));
+                p.setPrecio_compra(rs.getDouble("precioCompra"));
+                p.setPrecio_venta(rs.getDouble("precioVenta"));
+                p.setCantidad_Stock(rs.getInt("Cantidad_Stock"));
+                lista.add(p);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error DAO listar: " + e.getMessage());
+        }
+        return lista;
     }
 }
 
