@@ -199,5 +199,34 @@ public class ProductosDAO {
         }
         return lista;
     }
+    public List<Productos> listarInventario() {
+
+    List<Productos> lista = new ArrayList<>();
+
+    String sql = "{CALL sp_listarProductosStock()}";
+
+    try (Connection con = cn.conexion();
+         CallableStatement cs = con.prepareCall(sql);
+         ResultSet rs = cs.executeQuery()) {
+
+        while (rs.next()) {
+
+            Productos p = new Productos();
+
+            p.setId(rs.getInt("ID"));
+            p.setProducto(rs.getString("PRODUCTO"));
+            p.setModelo(rs.getString("MODELO"));
+            p.setCantidad_Stock(rs.getInt("STOCK"));
+
+            lista.add(p);
+        }
+
+    } catch (SQLException e) {
+        System.out.println("Error DAO listarInventario (SP): " + e.getMessage());
+    }
+
+    return lista;
+}
+
 }
 

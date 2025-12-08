@@ -200,6 +200,7 @@ private void registrarCliente(HttpServletRequest request, HttpServletResponse re
     boolean guardado = usuarioDAO.crearUsuario(nuevo);
 
     if (guardado) {
+        // SOLO REDIRECCIONAR A PRINCIPAL
         response.sendRedirect("InicioSesion.html");
     } else {
         request.setAttribute("mensajeError", "No se pudo registrar el usuario.");

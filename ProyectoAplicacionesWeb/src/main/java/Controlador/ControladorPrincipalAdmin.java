@@ -1,87 +1,80 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Controlador;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import Modelo.DAO.ProductosDAO;
+import Modelo.DAO.UsuarioDAO;
+import Modelo.Entidades.Productos;
+import Modelo.Entidades.Usuarios;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
-/**
- *
- * @author Arell
- */
 @WebServlet(name = "ControladorPrincipalAdmin", urlPatterns = {"/ControladorPrincipalAdmin"})
 public class ControladorPrincipalAdmin extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ControladorPrincipalAdmin</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ControladorPrincipalAdmin at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        String accion = request.getParameter("accion");
+
+        if (accion == null) {
+            accion = "inicio";  // Valor por defecto
+        }
+
+        switch (accion) {
+
+            case "inicio":
+                request.getRequestDispatcher("PrincipalAdmin.jsp").forward(request, response);
+                break;
+
+            case "inventario":
+                ProductosDAO daoInv = new ProductosDAO();
+                List<Productos> listaInv = daoInv.listarInventario();
+
+                request.setAttribute("listaProductos", listaInv);
+                request.getRequestDispatcher("PrincipalInventario.jsp").forward(request, response);
+                break;
+
+
+
+            case "misProductos":
+
+                // Cargar lista de productos desde DAO
+                ProductosDAO dao = new ProductosDAO();
+                List<Productos> lista = dao.listarProductos(); // tu método listar()
+
+                request.setAttribute("listaProductos", lista);
+
+                request.getRequestDispatcher("PrincipalProductos.jsp").forward(request, response);
+                break;
+
+            case "misVentas":
+                request.getRequestDispatcher("Principal.jsp").forward(request, response);
+                break;
+
+            case "usuario":
+
+                UsuarioDAO daoU = new UsuarioDAO();
+                List<Usuarios> listaUsuarios = daoU.listarUsuarios(); // tu método listar()
+
+                request.setAttribute("listaUsuarios", listaUsuarios);
+
+                request.getRequestDispatcher("PrincipalUsuarios.jsp").forward(request, response);
+                break;
+
+            default:
+                request.getRequestDispatcher("Principal.jsp").forward(request, response);
+                break;
+        }
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        doGet(request, response);
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }

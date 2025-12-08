@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: paneles
 -- ------------------------------------------------------
--- Server version	8.0.39
+-- Server version	8.0.43
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -28,7 +28,7 @@ CREATE TABLE `carrito` (
   PRIMARY KEY (`id`),
   KEY `usuario_id` (`usuario_id`),
   CONSTRAINT `carrito_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +37,7 @@ CREATE TABLE `carrito` (
 
 LOCK TABLES `carrito` WRITE;
 /*!40000 ALTER TABLE `carrito` DISABLE KEYS */;
-INSERT INTO `carrito` VALUES (1,3),(5,5);
+INSERT INTO `carrito` VALUES (1,3),(5,5),(6,8);
 /*!40000 ALTER TABLE `carrito` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -125,7 +125,7 @@ CREATE TABLE `producto_carrito` (
   KEY `producto_id` (`producto_id`),
   CONSTRAINT `producto_carrito_ibfk_1` FOREIGN KEY (`carrito_id`) REFERENCES `carrito` (`id`),
   CONSTRAINT `producto_carrito_ibfk_2` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,6 +150,7 @@ CREATE TABLE `productos` (
   `marca` varchar(50) DEFAULT NULL,
   `modelo` varchar(50) DEFAULT NULL,
   `descripcion` text,
+  `imagen` varchar(255) DEFAULT NULL,
   `precioCompra` decimal(10,2) DEFAULT NULL,
   `precioVenta` decimal(10,2) DEFAULT NULL,
   `Cantidad_Stock` int DEFAULT '0',
@@ -163,7 +164,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (1,'Panel Solar Monocristalino 400W','Trina Solar.','TS-400M','Alta eficiencia y rendimiento incluso en sombra',150.00,260.00,20),(2,'Panel Solar Flexible 100W','Renogy','RNG-FX100','Ideal para caravanas y superficies curvas',85.00,145.00,20),(3,'Inversor Solar 3000W Onda Pura','Growatt','GROW-3000','Convierte la energía solar en corriente alterna',280.00,480.00,10),(4,'Inversor Híbrido 5000W','Huawei','SUN2000-5KTL','Compatible con baterías y red eléctrica',450.00,750.00,8),(5,'Batería Litio 12V 100Ah','Battle Born','BB-12100','Larga vida útil y carga rápida',450.00,700.00,12),(6,'Batería AGM 12V 200Ah','Trojan','TRO-200AGM','Batería sellada libre de mantenimiento',300.00,520.00,15),(7,'Controlador de Carga MPPT 40A','Victron','VIC-40MPPT','Optimiza la carga de baterías desde el panel',110.00,180.00,18),(8,'Controlador PWM 30A','EPEVER','EP-PWM30','Regulador económico para sistemas pequeños',35.00,60.00,25),(9,'Kit Solar Básico 200W','EcoKit','EK-200','Incluye panel, regulador y cableado',220.00,350.00,10),(10,'Kit Solar Portátil 100W','Allpowers','AP-K100','Ideal para camping y emergencias',120.00,200.00,14),(11,'Cable Solar 4mm Rojo - 10m','SolarCable','SC-4R10','Cable resistente a rayos UV y altas temperaturas',10.00,18.00,40),(12,'Conectores MC4 (par)','SolarTech','MC4-ST','Conectores estándar para paneles solares',2.00,5.00,100),(13,'Cable Solar 6mm Negro - 10m','SolarCable','SC-6N10','Aislamiento doble y alta conductividad',12.00,22.00,30),(14,'Soporte Inclinación Panel Techo Plano','SunMount','SM-TPF','Aluminio resistente para instalación fija',30.00,55.00,16),(15,'Estructura para 4 Paneles','PanelRack','PR-4P','Estructura ajustable para techo metálico',80.00,140.00,8),(16,'Fusible Solar 20A','SolarSafe','SS-F20','Protección contra sobrecorrientes',3.00,7.00,50),(17,'Caja de conexiones IP65','SolarBox','SB-IP65','Protección para conexiones exteriores',15.00,28.00,20),(18,'Interruptor DC 1000V 32A','PVSwitch','PVS-32DC','Desconexión segura de corriente continua',20.00,35.00,15),(19,'Medidor de Energía Solar Digital','Victron','VIC-METER','Monitorea consumo y generación solar',45.00,80.00,10),(20,'Sensor de Temperatura para Batería','BatterySense','BS-TEMP','Optimiza la carga según la temperatura',10.00,18.00,25),(21,'Crimpadora para conectores solares','ToolTech','TT-CRIMP','Herramienta para MC4 y similares',25.00,45.00,12),(22,'Pelacables Solar Profesional','WirePro','WP-STRIP','Para cables solares de 2.5 a 6 mm²',12.00,22.00,20),(23,'Lámpara Solar LED 100W','GreenLight','GL-100LED','Lámpara exterior con panel integrado',35.00,65.00,22),(24,'Foco Solar con Sensor de Movimiento','LumiSolar','LS-SENSOR','Activación automática al detectar movimiento',20.00,38.00,30),(25,'Bomba de Agua Solar 12V','AgroSolar','AS-WP12','Ideal para riego con energía solar',90.00,150.00,7),(27,'Panel Solar','Tech','AS-23','Panel Solar 1000W',500.00,1000.00,0);
+INSERT INTO `productos` VALUES (1,'Panel Solar Monocristalino 400W','Trina Solar.','TS-400M','Alta eficiencia y rendimiento incluso en sombra',NULL,150.00,260.00,20),(2,'Panel Solar Flexible 100W','Renogy','RNG-FX100','Ideal para caravanas y superficies curvas',NULL,85.00,145.00,10),(3,'Inversor Solar 3000W Onda Pura','Growatt','GROW-3000','Convierte la energía solar en corriente alterna',NULL,280.00,480.00,10),(4,'Inversor Híbrido 5000W','Huawei','SUN2000-5KTL','Compatible con baterías y red eléctrica',NULL,450.00,750.00,8),(5,'Batería Litio 12V 100Ah','Battle Born','BB-12100','Larga vida útil y carga rápida',NULL,450.00,700.00,12),(6,'Batería AGM 12V 200Ah','Trojan','TRO-200AGM','Batería sellada libre de mantenimiento',NULL,300.00,520.00,15),(7,'Controlador de Carga MPPT 40A','Victron','VIC-40MPPT','Optimiza la carga de baterías desde el panel',NULL,110.00,180.00,18),(8,'Controlador PWM 30A','EPEVER','EP-PWM30','Regulador económico para sistemas pequeños',NULL,35.00,60.00,25),(9,'Kit Solar Básico 200W','EcoKit','EK-200','Incluye panel, regulador y cableado',NULL,220.00,350.00,10),(10,'Kit Solar Portátil 100W','Allpowers','AP-K100','Ideal para camping y emergencias',NULL,120.00,200.00,14),(11,'Cable Solar 4mm Rojo - 10m','SolarCable','SC-4R10','Cable resistente a rayos UV y altas temperaturas',NULL,10.00,18.00,40),(12,'Conectores MC4 (par)','SolarTech','MC4-ST','Conectores estándar para paneles solares',NULL,2.00,5.00,100),(13,'Cable Solar 6mm Negro - 10m','SolarCable','SC-6N10','Aislamiento doble y alta conductividad',NULL,12.00,22.00,30),(14,'Soporte Inclinación Panel Techo Plano','SunMount','SM-TPF','Aluminio resistente para instalación fija',NULL,30.00,55.00,16),(15,'Estructura para 4 Paneles','PanelRack','PR-4P','Estructura ajustable para techo metálico',NULL,80.00,140.00,8),(16,'Fusible Solar 20A','SolarSafe','SS-F20','Protección contra sobrecorrientes',NULL,3.00,7.00,50),(17,'Caja de conexiones IP65','SolarBox','SB-IP65','Protección para conexiones exteriores',NULL,15.00,28.00,20),(18,'Interruptor DC 1000V 32A','PVSwitch','PVS-32DC','Desconexión segura de corriente continua',NULL,20.00,35.00,15),(19,'Medidor de Energía Solar Digital','Victron','VIC-METER','Monitorea consumo y generación solar',NULL,45.00,80.00,10),(20,'Sensor de Temperatura para Batería','BatterySense','BS-TEMP','Optimiza la carga según la temperatura',NULL,10.00,18.00,25),(21,'Crimpadora para conectores solares','ToolTech','TT-CRIMP','Herramienta para MC4 y similares',NULL,25.00,45.00,12),(22,'Pelacables Solar Profesional','WirePro','WP-STRIP','Para cables solares de 2.5 a 6 mm²',NULL,12.00,22.00,20),(23,'Lámpara Solar LED 100W','GreenLight','GL-100LED','Lámpara exterior con panel integrado',NULL,35.00,65.00,22),(24,'Foco Solar con Sensor de Movimiento','LumiSolar','LS-SENSOR','Activación automática al detectar movimiento',NULL,20.00,38.00,30),(25,'Bomba de Agua Solar 12V','AgroSolar','AS-WP12','Ideal para riego con energía solar',NULL,90.00,150.00,7),(27,'Panel Solar','Tech','AS-23','Panel Solar 1000W',NULL,500.00,1000.00,0);
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -185,7 +186,7 @@ CREATE TABLE `usuario` (
   PRIMARY KEY (`ID`),
   UNIQUE KEY `NOMBRE_USUARIO` (`NOMBRE_USUARIO`),
   UNIQUE KEY `CORREO` (`CORREO`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -194,7 +195,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,'Ivan Alejandro Ochoa Vega','AOchoa','Tecuala #1910','AOchoa@gmail.com','$2a$10$PjZeLBnu396d0GExQcW.9.iCMscTkVD4l4D6.Yx5pTQGzk/m5Lj1O','admin'),(2,'Issac Andre Arellano','IArellano','Casa Blanca #2019','IArellano@gmail.com','$2a$10$KqNcL/hy0t5Yrg8BkAFe5.PglsbGkwf1JvziTIcgppcAZs9Sb3r9i','admin'),(3,'Carlos Armando Clark','AClark','Paris #100','AClark@gmail.com','$2a$10$Ukxvixdp9ZjdWEJPmZ5OfOP9BJ8RY.rNto/4hKJEo0ELGRhEO.tce','cliente'),(4,'Ivan Guillermo Becerra','IBecerra','Centro #234','IBecerra@gmail.com','$2a$10$UIhgsVjuJJ21HxUeXsfbX.FehxwvOVV3kix0baAX4MuocxsAYQjbq','cliente'),(5,'Victor Manuel Ochoa','VOchoa','Colonia Las Fuentes','VOchoa@gmail.com','$2a$10$o5CkXrv601onujGOyG1JbuqdlvSwUtMv5Bcv0DfwMhLKngyqBAidm','cliente'),(6,'Angel Garcia Gracia','AGarcia','Volcano #334','AGarcia@gmail.com','$2a$10$Mfemz4LeoDWEmWCKOSP5.upaoCVQyBH1RhUIo9Y9ITOOiHqqcChy6','cliente'),(7,'Martin Valdez','MValdez','Obregon #23','mValdez@gmail.com','$2a$10$dggCKWZTXJ.NwHLv/WNcpOXN15aa4gnlVPsYe1NrQZW0hwlpf/lEy','cliente');
+INSERT INTO `usuario` VALUES (1,'Ivan Alejandro Ochoa Vega','AOchoa','Tecuala #1910','AOchoa@gmail.com','$2a$10$PjZeLBnu396d0GExQcW.9.iCMscTkVD4l4D6.Yx5pTQGzk/m5Lj1O','admin'),(2,'Issac Andre Arellano','IArellano','Casa Blanca #2019','IArellano@gmail.com','$2a$10$KqNcL/hy0t5Yrg8BkAFe5.PglsbGkwf1JvziTIcgppcAZs9Sb3r9i','admin'),(3,'Carlos Armando Clark','AClark','Paris #100','AClark@gmail.com','$2a$10$Ukxvixdp9ZjdWEJPmZ5OfOP9BJ8RY.rNto/4hKJEo0ELGRhEO.tce','cliente'),(4,'Ivan Guillermo Becerra','IBecerra','Centro #234','IBecerra@gmail.com','$2a$10$UIhgsVjuJJ21HxUeXsfbX.FehxwvOVV3kix0baAX4MuocxsAYQjbq','cliente'),(5,'Victor Manuel Ochoa','VOchoa','Colonia Las Fuentes','VOchoa@gmail.com','$2a$10$o5CkXrv601onujGOyG1JbuqdlvSwUtMv5Bcv0DfwMhLKngyqBAidm','cliente'),(6,'Angel Garcia Gracia','AGarcia','Volcano #334','AGarcia@gmail.com','$2a$10$Mfemz4LeoDWEmWCKOSP5.upaoCVQyBH1RhUIo9Y9ITOOiHqqcChy6','cliente'),(7,'Martin Valdez','MValdez','Obregon #23','mValdez@gmail.com','$2a$10$dggCKWZTXJ.NwHLv/WNcpOXN15aa4gnlVPsYe1NrQZW0hwlpf/lEy','cliente'),(8,'Isaac Andre Arell','Andrew','reyes del castillo','29842@potros.itson.edu.mx','$2a$10$NrqNNa8H9oAFHuLr8Q4P2eYu1iE2az2xM/6wSV3vSWzyIqk5YqfSS','cliente'),(10,'Isaac Andre Arell','Andre','reyes del au ','arellano@potros.itson.edu.mx','$2a$10$VO./0K3LauDcWdtIxUcRS.LY.gVIOhkqg3QZZtzj2rNZiRLYSX1O6','admin');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1018,6 +1019,39 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `sp_ObtenerListaUsuariosFinal` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ObtenerListaUsuariosFinal`()
+BEGIN
+    SELECT 
+        ID,
+        NOMBRE_COMPLETO,
+        NOMBRE_USUARIO,
+        DIRECCION,
+        CORREO,
+        ROL
+    FROM usuario
+    ORDER BY 
+        CASE 
+            WHEN ROL = 'ADMIN' THEN 1
+            WHEN ROL = 'CLIENTE' THEN 2
+            ELSE 3
+        END,
+        NOMBRE_COMPLETO;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `sp_ObtenerRolPorId` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1410,4 +1444,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-07 17:13:12
+-- Dump completed on 2025-12-07 21:43:34

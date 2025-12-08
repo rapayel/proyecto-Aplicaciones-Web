@@ -26,7 +26,7 @@ public class VentasDAO {
             ORDER BY v.fecha DESC
         """;
 
-        try (Connection con = cn.conectar();
+        try (Connection con = cn.conexion();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -57,7 +57,7 @@ public class VentasDAO {
             WHERE dv.venta_id = ?
         """;
 
-        try (Connection con = cn.conectar();
+        try (Connection con = cn.conexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, idVenta);
