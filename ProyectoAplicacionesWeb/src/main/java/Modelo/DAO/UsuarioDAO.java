@@ -4,12 +4,18 @@
  */
 package Modelo.DAO;
 
-import Modelo.Conexiones.ConexionMySQL;
-import Modelo.Entidades.Usuarios;
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.mindrot.jbcrypt.BCrypt;
+
+import Modelo.Conexiones.ConexionMySQL;
+import Modelo.Entidades.Usuarios;
 
 /**
  *
@@ -147,7 +153,6 @@ public class UsuarioDAO {
 
     // ACTUALIZAR USUARIO (Desde el Admin)
     public boolean actualizarUsuario(Usuarios u) {
-        // Usamos el SP que vi en tu base de datos: sp_ActualizarUsuario
         String sql = "{CALL sp_ActualizarUsuario(?, ?, ?, ?, ?)}";
 
         try (Connection con = cn.conexion();
@@ -179,7 +184,6 @@ public class UsuarioDAO {
         } catch (SQLException e) {
             System.err.println(" Error eliminarUsuario: " + e.getMessage());
             // Si el usuario tiene ventas, esto fallará por Foreign Key. 
-            // Es mejor manejar ese error avisando "No se puede borrar usuario con historial".
             return false;
         }
     }

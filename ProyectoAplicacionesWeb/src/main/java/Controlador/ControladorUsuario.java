@@ -4,18 +4,18 @@
  */
 package Controlador;
 
-
-import Modelo.DAO.UsuarioDAO;
-import Servicios.ServicioGmail;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import Modelo.DAO.UsuarioDAO;
+import Modelo.Entidades.Usuarios;
+import Servicios.ServicioGmail;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import Modelo.Entidades.Usuarios;
 
 /**
  *
@@ -23,14 +23,14 @@ import Modelo.Entidades.Usuarios;
  */
 @WebServlet(name = "ControladorUsuario", urlPatterns = {"/ControladorUsuario"})
 public class ControladorUsuario extends HttpServlet {
+
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
-    private final  ServicioGmail  servicioGmail= new ServicioGmail();
+    private final ServicioGmail servicioGmail = new ServicioGmail();
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -43,29 +43,14 @@ public class ControladorUsuario extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+   
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+   
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -76,25 +61,20 @@ public class ControladorUsuario extends HttpServlet {
                 validarLogin(request, response);
                 break;
             case "registrarCliente":
-    registrarCliente(request, response);
-    break;
-
+                registrarCliente(request, response);
+                break;
 
             default:
                 response.sendRedirect("errorPagina.html");
         }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
+   
     @Override
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-    
+
 //    private void registrarUsuario(HttpServletRequest request, HttpServletResponse response)
 //            throws IOException, ServletException {
 //        String nombreCompleto = request.getParameter("txtNombre");
@@ -116,48 +96,46 @@ public class ControladorUsuario extends HttpServlet {
 //            response.sendRedirect("registro.html?error=1");
 //        }
 //    }
-    
     /**
- * Método encargado de validar el inicio de sesión de un usuario
- */
-private void validarLogin(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    
-    // Obtener parámetros del formulario
-    String nombreUsuario = request.getParameter("txtUsuario");
-    String password = request.getParameter("txtPassword");
+     * Método encargado de validar el inicio de sesión de un usuario
+     */
+    private void validarLogin(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    // Crear el objeto Usuario y asignar valores
-    Usuarios usuario = new Usuarios();
-    usuario.setNombreUsuario(nombreUsuario);
-    usuario.setContraseña(password);
+        // Obtener parámetros del formulario
+        String nombreUsuario = request.getParameter("txtUsuario");
+        String password = request.getParameter("txtPassword");
 
-    // Ejecutar el método Loggin para validar credenciales
-    int userId = usuarioDAO.Loggin(usuario);
+        // Crear el objeto Usuario y asignar valores
+        Usuarios usuario = new Usuarios();
+        usuario.setNombreUsuario(nombreUsuario);
+        usuario.setContraseña(password);
 
-    if (userId > 0) {
-         // 2. Obtener el ROL del usuario desde el SP
-        String rol = usuarioDAO.obtenerRolPorId(userId);
-        // Inicio de sesión exitoso → crear sesión
-        HttpSession session = request.getSession();
-        session.setAttribute("idUsuario", userId);
-        session.setAttribute("nombreUsuario", nombreUsuario);
-        session.setAttribute("rol", rol);
+        // Ejecutar el método Loggin para validar credenciales
+        int userId = usuarioDAO.Loggin(usuario);
 
-        // 4. Redirección según ROL
-        if ("admin".equalsIgnoreCase(rol)) {
-            response.sendRedirect("PrincipalAdmin.jsp");
+        if (userId > 0) {
+            //  Obtener el ROL del usuario desde el SP
+            String rol = usuarioDAO.obtenerRolPorId(userId);
+            // Inicio de sesión exitoso → crear sesión
+            HttpSession session = request.getSession();
+            session.setAttribute("idUsuario", userId);
+            session.setAttribute("nombreUsuario", nombreUsuario);
+            session.setAttribute("rol", rol);
+
+            //  Redirección según ROL
+            if ("admin".equalsIgnoreCase(rol)) {
+                response.sendRedirect("PrincipalAdmin.jsp");
+            } else {
+                response.sendRedirect("ControladorPrincipal?accion=listar");
+            }
+
         } else {
-            response.sendRedirect("ControladorPrincipal?accion=listar");
+            // Usuario o contraseña incorrectos → regresar al login con mensaje
+            request.setAttribute("mensajeError", "Usuario o contraseña incorrectos");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
-
-    } 
-    else {
-        // Usuario o contraseña incorrectos → regresar al login con mensaje
-        request.setAttribute("mensajeError", "Usuario o contraseña incorrectos");
-        request.getRequestDispatcher("login.jsp").forward(request, response);
     }
-}
 //
 //private void recuperarCuenta(HttpServletRequest request, HttpServletResponse response)
 //        throws ServletException, IOException {
@@ -180,35 +158,33 @@ private void validarLogin(HttpServletRequest request, HttpServletResponse respon
 //        request.getRequestDispatcher("recuperar.jsp").forward(request, response);
 //    }
 //}
-private void registrarCliente(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
 
-    String nombreCompleto = request.getParameter("txtNombreCompleto");
-    String nombreUsuario = request.getParameter("txtUsuario");
-    String direccion = request.getParameter("txtDireccion");
-    String correo = request.getParameter("txtCorreo");
-    String contrasena = request.getParameter("txtPassword");
+    private void registrarCliente(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    Usuarios nuevo = new Usuarios();
-    nuevo.setNombreCompleto(nombreCompleto);
-    nuevo.setNombreUsuario(nombreUsuario);
-    nuevo.setDireccion(direccion);
-    nuevo.setCorreo(correo);
-    nuevo.setContraseña(contrasena);
-    nuevo.setRol("cliente");
+        String nombreCompleto = request.getParameter("txtNombreCompleto");
+        String nombreUsuario = request.getParameter("txtUsuario");
+        String direccion = request.getParameter("txtDireccion");
+        String correo = request.getParameter("txtCorreo");
+        String contrasena = request.getParameter("txtPassword");
 
-    boolean guardado = usuarioDAO.crearUsuario(nuevo);
+        Usuarios nuevo = new Usuarios();
+        nuevo.setNombreCompleto(nombreCompleto);
+        nuevo.setNombreUsuario(nombreUsuario);
+        nuevo.setDireccion(direccion);
+        nuevo.setCorreo(correo);
+        nuevo.setContraseña(contrasena);
+        nuevo.setRol("cliente");
 
-    if (guardado) {
-        // SOLO REDIRECCIONAR A PRINCIPAL
-        response.sendRedirect("InicioSesion.html");
-    } else {
-        request.setAttribute("mensajeError", "No se pudo registrar el usuario.");
-        request.getRequestDispatcher("Registrar.html").forward(request, response);
+        boolean guardado = usuarioDAO.crearUsuario(nuevo);
+
+        if (guardado) {
+            // SOLO REDIRECCIONAR A PRINCIPAL
+            response.sendRedirect("InicioSesion.html");
+        } else {
+            request.setAttribute("mensajeError", "No se pudo registrar el usuario.");
+            request.getRequestDispatcher("Registrar.html").forward(request, response);
+        }
     }
-}
-
-
-
 
 }

@@ -9,19 +9,21 @@ package Modelo.DAO;
  * @author Arell
  */
 
-import Modelo.Conexiones.ConexionMySQL;
-import Modelo.Entidades.Productos;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import Modelo.Conexiones.ConexionMySQL;
+import Modelo.Entidades.Productos;
 
 public class CarritoDAO {
 
     private final ConexionMySQL cn = new ConexionMySQL();
 
-    // -------------------------------------------------------------
-    // LISTAR CARRITO
-    // -------------------------------------------------------------
+  
     public List<Productos> obtenerCarrito(int idUsuario) {
 
         List<Productos> carrito = new ArrayList<>();
@@ -52,15 +54,13 @@ public class CarritoDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error DAO obtenerCarrito: " + e.getMessage());
+            System.out.println("Error DAO obtenerCarrito: " + e.getMessage());
         }
 
         return carrito;
     }
 
-    // -------------------------------------------------------------
-    // ELIMINAR PRODUCTO DEL CARRITO
-    // -------------------------------------------------------------
+    
     public boolean eliminarProducto(int idUsuario, int idProducto) {
 
         String sql = """
@@ -78,14 +78,11 @@ public class CarritoDAO {
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            System.out.println("❌ Error DAO eliminarProducto: " + e.getMessage());
+            System.out.println("Error DAO eliminarProducto: " + e.getMessage());
             return false;
         }
     }
 
-    // -------------------------------------------------------------
-    // FINALIZAR COMPRA
-    // -------------------------------------------------------------
     public boolean finalizarCompra(int idUsuario) {
 
         String sql = """
@@ -102,7 +99,7 @@ public class CarritoDAO {
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            System.out.println("❌ Error DAO finalizarCompra: " + e.getMessage());
+            System.out.println(" Error DAO finalizarCompra: " + e.getMessage());
             return false;
         }
     }

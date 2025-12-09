@@ -9,19 +9,20 @@ package Modelo.DAO;
  * @author Arell
  */
 
-import Modelo.Conexiones.ConexionMySQL;
-import Modelo.Entidades.Productos;
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import Modelo.Conexiones.ConexionMySQL;
+import Modelo.Entidades.Productos;
 
 public class ProductosDAO {
 
     private final ConexionMySQL cn = new ConexionMySQL();
 
-    // ---------------------------------------------------------
-    // LISTAR PRODUCTOS
-    // ---------------------------------------------------------
     public List<Productos> listarProductos() {
 
         List<Productos> lista = new ArrayList<>();
@@ -48,15 +49,12 @@ public class ProductosDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error DAO listarProductos: " + e.getMessage());
+            System.out.println(" Error DAO listarProductos: " + e.getMessage());
         }
 
         return lista;
     }
 
-    // ---------------------------------------------------------
-    // AGREGAR PRODUCTO AL CARRITO
-    // ---------------------------------------------------------
     public boolean agregarAlCarrito(int idUsuario, int idProducto, int cantidad) {
 
         String sql = "{CALL sp_AgregarProductoCarrito(?,?,?)}";
@@ -72,7 +70,7 @@ public class ProductosDAO {
             return true;
 
         } catch (SQLException e) {
-            System.out.println("❌ Error DAO agregarAlCarrito: " + e.getMessage());
+            System.out.println(" Error DAO agregarAlCarrito: " + e.getMessage());
             return false;
         }
     }
