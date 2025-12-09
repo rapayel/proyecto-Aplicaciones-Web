@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+
 /**
  *
  * @author lagar
@@ -43,14 +44,12 @@ public class ControladorUsuario extends HttpServlet {
         }
     }
 
-   
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
 
-   
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -63,13 +62,15 @@ public class ControladorUsuario extends HttpServlet {
             case "registrarCliente":
                 registrarCliente(request, response);
                 break;
+            case "recuperarCuenta":
+                recuperarCuenta(request, response);
+                break;
 
             default:
                 response.sendRedirect("errorPagina.html");
         }
     }
 
-   
     @Override
     public String getServletInfo() {
         return "Short description";
@@ -186,5 +187,49 @@ public class ControladorUsuario extends HttpServlet {
             request.getRequestDispatcher("Registrar.html").forward(request, response);
         }
     }
+
+    /**
+     * Método encargado de gestionar la solicitud de recuperación de contraseña.
+     * Envía la contraseña actual del usuario a su correo electrónico.
+     */
+    private void recuperarCuenta(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String nombreUsuario = request.getParameter("txtUsuario");
+
+        // Llama al DAO para buscar el usuario por nombre
+        // Se asume que el UsuarioDAO tiene el método buscarPorNombreUsuario(String)
+        Usuarios usuario = usuarioDAO.buscarPorNombreUsuario(nombreUsuario);
+
+        if (usuario != null) {
+            // Asunto del correo
+            String asunto = "Recuperación de Cuenta - Tienda Solar";
+
+            // Cuerpo del correo (Aquí se envía la contraseña hasheada, lo cual es solo para
+            String mensaje = "Hola " + usuario.getNombreCompleto() + ",\n\n"
+                    + "Se ha solicitado la recuperación de tu contraseña. "
+                    + "Por motivos de seguridad, si esto no fue solicitado por ti, ignora este correo.\n\n"
+                    + "Tu contraseña registrada es: " + usuario.getContraseña() + "\n\n"
+                    + "Atentamente,\nEquipo de Tienda Solar.";
+
+            // Envía el correo de forma asíncrona
+            servicioGmail.enviarCorreoAsync(
+                    usuario.getCorreo(),
+                    asunto,
+                    mensaje
+            );
+
+            // Redirigir al login con un mensaje de éxito
+            response.sendRedirect("InicioSesion.html?recuperacion=success");
+
+        } else {
+            // Usuario no encontrado
+            request.setAttribute("mensajeError", "No existe ningún usuario registrado con ese nombre.");
+            // Redirige al formulario de recuperación (Recuperar.html) para mostrar el mensaje
+            request.getRequestDispatcher("Recuperar.html").forward(request, response);
+        }
+    }
+
+    
 
 }

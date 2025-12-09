@@ -1,12 +1,15 @@
 package Controlador;
 
+import java.io.IOException;
+import java.util.List;
+
 import Modelo.DAO.ProductosDAO;
 import Modelo.Entidades.Productos;
-import java.io.IOException;
-import java.util.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name = "ControladorPrincipal", urlPatterns = {"/ControladorPrincipal"})
 public class ControladorPrincipal extends HttpServlet {
@@ -44,9 +47,6 @@ public class ControladorPrincipal extends HttpServlet {
         }
     }
 
-    // ---------------------------------------------------------
-    // LISTAR PRODUCTOS
-    // ---------------------------------------------------------
     private void listarProductos(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -56,9 +56,8 @@ public class ControladorPrincipal extends HttpServlet {
         request.getRequestDispatcher("Principal.jsp").forward(request, response);
     }
 
-    // ---------------------------------------------------------
-    // AGREGAR AL CARRITO
-    // ---------------------------------------------------------
+
+    
     private void agregarCarrito(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 

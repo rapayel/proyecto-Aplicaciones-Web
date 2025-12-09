@@ -26,10 +26,10 @@ public class UsuarioDAO {
     private final ConexionMySQL cn = new ConexionMySQL();
 
     // Método para hashear la contraseña
-    
     private String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
+
     // Método para verificar la contraseña
     public boolean verifyPassword(String password, String storedHashedPassword) {
         return BCrypt.checkpw(password, storedHashedPassword);
@@ -38,11 +38,10 @@ public class UsuarioDAO {
     // Método de login que devuelve el ID del usuario si es exitoso, -1 si falla
     public int Loggin(Usuarios usuario) {
         int userId = -1;
-        try (Connection con = cn.conexion(); 
-             CallableStatement stmt = con.prepareCall("{CALL SP_Loggin(?)}")) {
+        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall("{CALL SP_Loggin(?)}")) {
 
             stmt.setString(1, usuario.getNombreUsuario());
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String hashedPassword = rs.getString("CONTRASEÑA");
@@ -58,13 +57,12 @@ public class UsuarioDAO {
         }
         return userId;
     }
-        
+
     // Obtener el rol del usuario por su ID
     public String obtenerRolPorId(int idUsuario) {
         String rol = null;
-        try (Connection con = cn.conexion();
-             CallableStatement stmt = con.prepareCall("{CALL sp_ObtenerRolPorId(?)}")) {
-            
+        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall("{CALL sp_ObtenerRolPorId(?)}")) {
+
             stmt.setInt(1, idUsuario);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -79,16 +77,15 @@ public class UsuarioDAO {
 
     // registro de usuarios normales (Clientes)
     public boolean crearUsuario(Usuarios usuario) {
-        try (Connection con = cn.conexion();
-             CallableStatement stmt = con.prepareCall("{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}")) {
+        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall("{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}")) {
 
             stmt.setString(1, usuario.getNombreCompleto());
             stmt.setString(2, usuario.getNombreUsuario());
             stmt.setString(3, usuario.getDireccion());
             stmt.setString(4, usuario.getCorreo());
-            stmt.setString(5, hashPassword(usuario.getContraseña())); 
+            stmt.setString(5, hashPassword(usuario.getContraseña()));
             stmt.setString(6, "CLIENTE"); // Rol por defecto
-            
+
             stmt.execute();
             return true;
         } catch (SQLException e) {
@@ -98,15 +95,12 @@ public class UsuarioDAO {
     }
 
     // MÉTODOS PARA EL CRUD DE ADMINISTRADOR
-
     //  LISTAR TODOS LOS USUARIOS
     public List<Usuarios> listarUsuarios() {
         List<Usuarios> lista = new ArrayList<>();
         String sql = "SELECT * FROM usuario"; // Nombre de tabla en singular según el SQL 
 
-        try (Connection con = cn.conexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Usuarios u = new Usuarios();
@@ -130,8 +124,7 @@ public class UsuarioDAO {
         Usuarios u = null;
         String sql = "SELECT * FROM usuario WHERE ID = ?";
 
-        try (Connection con = cn.conexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
@@ -155,15 +148,14 @@ public class UsuarioDAO {
     public boolean actualizarUsuario(Usuarios u) {
         String sql = "{CALL sp_ActualizarUsuario(?, ?, ?, ?, ?)}";
 
-        try (Connection con = cn.conexion();
-             CallableStatement stmt = con.prepareCall(sql)) {
+        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall(sql)) {
 
             stmt.setInt(1, u.getId());
             stmt.setString(2, u.getNombreCompleto());
             stmt.setString(3, u.getNombreUsuario());
             stmt.setString(4, u.getDireccion());
             stmt.setString(5, u.getCorreo());
-            
+
             stmt.execute();
             return true;
         } catch (SQLException e) {
@@ -176,8 +168,7 @@ public class UsuarioDAO {
     public boolean eliminarUsuario(int id) {
         String sql = "DELETE FROM usuario WHERE ID = ?";
 
-        try (Connection con = cn.conexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
@@ -186,5 +177,32 @@ public class UsuarioDAO {
             // Si el usuario tiene ventas, esto fallará por Foreign Key. 
             return false;
         }
+    }
+
+    public Usuarios buscarPorNombreUsuario(String nombreUsuario) {
+        Usuarios u = null;
+        String sql = "SELECT * FROM usuario WHERE NOMBRE_USUARIO = ?";
+
+        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, nombreUsuario);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    u = new Usuarios();
+                    // Mapeamos las columnas exactas de tu tabla 'usuario'
+                    u.setId(rs.getInt("ID"));
+                    u.setNombreCompleto(rs.getString("NOMBRE_COMPLETO"));
+                    u.setNombreUsuario(rs.getString("NOMBRE_USUARIO"));
+                    u.setDireccion(rs.getString("DIRECCION"));
+                    u.setCorreo(rs.getString("CORREO"));
+                    u.setContraseña(rs.getString("CONTRASEÑA")); // Hash de la contraseña
+                    u.setRol(rs.getString("ROL"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error buscarPorNombreUsuario: " + e.getMessage());
+        }
+        return u;
     }
 }
