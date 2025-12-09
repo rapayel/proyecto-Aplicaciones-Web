@@ -19,7 +19,6 @@ import jakarta.servlet.http.*;
  * @author Arell
  */
 
-
 @WebServlet(name = "ControladorCarrito", urlPatterns = {"/ControladorCarrito"})
 public class ControladorCarrito extends HttpServlet {
 
@@ -33,14 +32,18 @@ public class ControladorCarrito extends HttpServlet {
         if (accion == null) accion = "verCarrito";
 
         switch (accion) {
+            case "agregarProducto":
+                agregarProducto(request, response);
+                break;
+            case "modificarCantidad":
+                modificarCantidad(request, response);
+                break;
             case "verCarrito":
                 verCarrito(request, response);
                 break;
-
             case "eliminarProducto":
                 eliminarProducto(request, response);
                 break;
-
             default:
                 verCarrito(request, response);
                 break;
@@ -53,16 +56,17 @@ public class ControladorCarrito extends HttpServlet {
 
         String accion = request.getParameter("accion");
 
-        if ("finalizarCompra".equals(accion)) {
-            finalizarCompra(request, response);
+        if ("iniciarCheckout".equals(accion)) { 
+            iniciarCheckout(request, response);
+        } else if ("confirmarPedido".equals(accion)) { 
+            confirmarPedido(request, response);
         } else {
             verCarrito(request, response);
         }
     }
 
-    // -------------------------------------------------------------
-    // VER CARRITO
-    // -------------------------------------------------------------
+    // MÃ‰TODOS BASE (verCarrito, eliminarProducto)
+    // El mÃ©todo verCarrito debe seguir en tu clase
     private void verCarrito(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -75,7 +79,6 @@ public class ControladorCarrito extends HttpServlet {
         }
 
         int idUsuario = (int) idObj;
-
         List<Productos> carrito = carritoDAO.obtenerCarrito(idUsuario);
 
         double total = carrito.stream()
@@ -87,10 +90,7 @@ public class ControladorCarrito extends HttpServlet {
 
         request.getRequestDispatcher("Carrito.jsp").forward(request, response);
     }
-
-    // -------------------------------------------------------------
-    // ELIMINAR PRODUCTO
-    // -------------------------------------------------------------
+    
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -104,29 +104,141 @@ public class ControladorCarrito extends HttpServlet {
         if (ok) {
             request.setAttribute("mensaje", "Producto eliminado del carrito.");
         } else {
-            request.setAttribute("mensaje", "❌ No se pudo eliminar el producto.");
+            request.setAttribute("mensaje", "âŒ No se pudo eliminar el producto.");
         }
 
         verCarrito(request, response);
     }
 
-    // -------------------------------------------------------------
-    // FINALIZAR COMPRA
-    // -------------------------------------------------------------
-    private void finalizarCompra(HttpServletRequest request, HttpServletResponse response)
+    // MÃ‰TODOS DE MANEJO DEL CARRITO (agregarProducto, modificarCantidad)
+    
+    private void agregarProducto(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        Object idObj = session.getAttribute("idUsuario");
+
+        if (idObj == null) {
+            response.sendRedirect("InicioSesion.html");
+            return;
+        }
+        
+        try {
+            int idUsuario = (int) idObj;
+            int idProducto = Integer.parseInt(request.getParameter("idProducto"));
+            int cantidad = 1; 
+            
+            String cantidadStr = request.getParameter("cantidad");
+            if (cantidadStr != null && !cantidadStr.isEmpty()) {
+                cantidad = Integer.parseInt(cantidadStr);
+            }
+            
+            boolean ok = carritoDAO.agregarOActualizarProducto(idUsuario, idProducto, cantidad);
+
+            if (ok) {
+                request.setAttribute("mensaje", "âœ” Producto aÃ±adido al carrito.");
+            } else {
+                request.setAttribute("mensaje", "âŒ No se pudo aÃ±adir el producto.");
+            }
+
+        } catch (NumberFormatException | NullPointerException e) {
+            request.setAttribute("mensaje", "âŒ Error de parÃ¡metros al aÃ±adir producto.");
+        }
+        verCarrito(request, response); 
+    }
+    
+    private void modificarCantidad(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        HttpSession session = request.getSession();
+        Object idObj = session.getAttribute("idUsuario");
+
+        if (idObj == null) {
+            response.sendRedirect("InicioSesion.html");
+            return;
+        }
+        
+        try {
+            int idUsuario = (int) idObj;
+            int idProducto = Integer.parseInt(request.getParameter("idProducto"));
+            int nuevaCantidad = Integer.parseInt(request.getParameter("cantidad"));
+            
+            boolean ok = carritoDAO.modificarCantidad(idUsuario, idProducto, nuevaCantidad);
+
+            if (ok) {
+                request.setAttribute("mensaje", "Cantidad actualizada.");
+            } else {
+                request.setAttribute("mensaje", "âŒ No se pudo modificar la cantidad.");
+            }
+
+        } catch (NumberFormatException | NullPointerException e) {
+            request.setAttribute("mensaje", "âŒ Error de parÃ¡metros al modificar cantidad.");
+        }
+        
+        verCarrito(request, response);
+    }
+
+    // MÃ‰TODOS DEL CHECKOUT (iniciarCheckout, confirmarPedido)
+
+    private void iniciarCheckout(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        Object idObj = session.getAttribute("idUsuario");
+        
+        if (idObj == null) {
+            response.sendRedirect("InicioSesion.html");
+            return;
+        }
+
+        int idUsuario = (int) idObj;
+        List<Productos> carrito = carritoDAO.obtenerCarrito(idUsuario);
+
+        if (carrito.isEmpty()) {
+            request.setAttribute("mensaje", "âš  No puedes finalizar la compra con el carrito vacÃ­o.");
+            verCarrito(request, response);
+            return;
+        }
+        
+        double total = carrito.stream()
+                .mapToDouble(p -> p.getPrecio_venta() * p.getCantidad_Stock())
+                .sum();
+
+        request.setAttribute("carrito", carrito);
+        request.setAttribute("total", total);
+        
+        request.getRequestDispatcher("ProcesoCompra.jsp").forward(request, response);
+    }
+    
+    private void confirmarPedido(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
         int idUsuario = (int) session.getAttribute("idUsuario");
 
-        boolean ok = carritoDAO.finalizarCompra(idUsuario);
+        // 1. Obtener datos (se leen, pero se ignoran en el DAO)
+        String direccionEnvio = request.getParameter("direccionEnvio");
+        String metodoPago = request.getParameter("metodoPago");
+        
+        // 2. Ejecutar la transacciÃ³n de venta (El DAO ignora los parÃ¡metros)
+        String numPedido = carritoDAO.procesarVentaCompleta(idUsuario, direccionEnvio, metodoPago);
 
-        if (ok) {
-            request.setAttribute("mensaje", "✔ Compra finalizada correctamente.");
+        if (numPedido != null) {
+            enviarCorreoConfirmacion(idUsuario, numPedido, direccionEnvio); 
+
+            request.setAttribute("numPedido", numPedido);
+            request.getRequestDispatcher("Confirmacion.jsp").forward(request, response);
+            
         } else {
-            request.setAttribute("mensaje", "⚠ No había productos activos en el carrito.");
+            request.setAttribute("mensaje", "âŒ Error al procesar la compra. Intente de nuevo.");
+            verCarrito(request, response);
         }
-
-        verCarrito(request, response);
+    }
+    
+    private void enviarCorreoConfirmacion(int idUsuario, String numPedido, String direccion) {
+        // LÃ³gica de simulaciÃ³n para cumplir el requisito de notificar
+        System.out.println("ðŸ“© Enviando confirmaciÃ³n de pedido " + numPedido + " al usuario " + idUsuario);
     }
 }
+
+
