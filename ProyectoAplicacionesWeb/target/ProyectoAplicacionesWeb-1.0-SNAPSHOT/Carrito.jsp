@@ -1,3 +1,5 @@
+
+
 <%@ page import="java.util.*, Modelo.Entidades.Productos" %>
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <!DOCTYPE html>
@@ -29,18 +31,20 @@
 
         <h1 class="titulo-carrito">🛒 Mi Carrito</h1>
 
-        <% 
+        <%
+            // Mostrar mensajes de confirmación/error
             String mensaje = (String) request.getAttribute("mensaje");
             if (mensaje != null) { 
         %>
             <div class="mensaje">
                 <%= mensaje %>
             </div>
-        <% 
-            } 
+        <%
+            }
         %>
 
         <%
+            // Obtener variables de Request
             List<Productos> carrito = (List<Productos>) request.getAttribute("carrito");
             Double total = (Double) request.getAttribute("total");
             if (total == null) total = 0.0;
@@ -61,14 +65,39 @@
                 <tbody>
                     <%
                         for (Productos p : carrito) {
+                            // Cálculo de subtotal por ítem
                             double subtotal = p.getPrecio_venta() * p.getCantidad_Stock();
                     %>
                     <tr>
                         <td><%= p.getProducto() %></td>
                         <td><%= p.getDescripcion() %></td>
-                        <td>$<%= p.getPrecio_venta() %> USD</td>
-                        <td><%= p.getCantidad_Stock() %></td>
-                        <td>$<%= subtotal %> USD</td>
+                        <td>$<%= String.format("%.2f", p.getPrecio_venta()) %> USD</td>
+                        
+                        <%-- NUEVO: Columna para MODIFICAR CANTIDAD --%>
+                        <td>
+                            <form action="ControladorCarrito" method="get" class="form-cantidad">
+                                <input type="hidden" name="accion" value="modificarCantidad">
+                                <input type="hidden" name="idProducto" value="<%= p.getId() %>">
+                                
+                                <%-- Botón para Decrementar (Envía Cantidad Actual - 1). El DAO maneja si es <= 0 --%>
+                                <button type="submit" 
+                                        name="cantidad" 
+                                        value="<%= p.getCantidad_Stock() - 1 %>" 
+                                        class="btn-cantidad">-</button>
+                                
+                                <span class="cantidad-actual"><%= p.getCantidad_Stock() %></span>
+                                
+                                <%-- Botón para Incrementar --%>
+                                <button type="submit" 
+                                        name="cantidad" 
+                                        value="<%= p.getCantidad_Stock() + 1 %>" 
+                                        class="btn-cantidad">+</button>
+                            </form>
+                        </td>
+                        
+                        <td>$<%= String.format("%.2f", subtotal) %> USD</td>
+                        
+                        <%-- Columna para ELIMINAR --%>
                         <td>
                             <form action="ControladorCarrito" method="get">
                                 <input type="hidden" name="accion" value="eliminarProducto">
@@ -82,19 +111,20 @@
             </table>
 
             <div class="total">
-                <h2>Total: $<%= total %> USD</h2>
+                <h2>Total: $<%= String.format("%.2f", total) %> USD</h2>
 
+                <%-- MODIFICADO: Formulario para iniciar el flujo de Checkout --%>
                 <form action="ControladorCarrito" method="post">
-                    <input type="hidden" name="accion" value="finalizarCompra">
-                    <button type="submit" class="btn-finalizar">Finalizar compra</button>
+                    <input type="hidden" name="accion" value="iniciarCheckout">
+                    <button type="submit" class="btn-finalizar">Proceder al Pago y Envío</button>
                 </form>
             </div>
 
-        <% 
+        <%
             } else { 
         %>
             <p class="mensaje-vacio">Tu carrito está vacío 🛒</p>
-        <% 
+        <%
             } 
         %>
     </main>
@@ -104,3 +134,11 @@
     </footer>
 </body>
 </html>
+
+
+
+
+
+
+
+

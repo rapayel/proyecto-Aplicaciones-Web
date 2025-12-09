@@ -4,58 +4,104 @@
  */
 package Modelo.DAO;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import Modelo.Conexiones.ConexionMySQL;
+import Modelo.Entidades.Usuarios;
+import Servicios.ServicioGmail;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.swing.JOptionPane;
 import org.mindrot.jbcrypt.BCrypt;
 
 import Modelo.Conexiones.ConexionMySQL;
 import Modelo.Entidades.Usuarios;
 
 /**
- *
+ * 
  * @author lagar
  */
 public class UsuarioDAO {
-
+    
     private final ConexionMySQL cn = new ConexionMySQL();
+    private final  ServicioGmail  gmail= new ServicioGmail();
+    private Connection conexion;
 
-    // Método para hashear la contraseña
+    public UsuarioDAO() {
+        ConexionMySQL cn = new ConexionMySQL();
+        this.conexion = cn.conexion();
+    }
+
+
+        
+//       private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
+//            throws IOException, ServletException {
+//        String nombreUsuario = request.getParameter("txtUsuario");
+//        Connection con = cn.conexion();
+//        if (con == null) {
+//            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
+//            request.getRequestDispatcher("InicioSesion.html").forward(request, response);
+//            return;
+//        }
+//        String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ?";
+//        try (PreparedStatement ps = con.prepareStatement(sql)){
+//            ps.setString(1, nombreUsuario);
+//            try(ResultSet rs = ps.executeQuery()){
+//                if(rs.next()){
+//                    String correo = rs.getString("correo");
+//                    String contra = rs.getString("contraseña");
+//                    response.sendRedirect("InicioSesion.html");
+//                    gmail.enviarCorreoAsync(correo, "recuperar contraseña", "la contraseña es: " + contra + " porfavor, que no se te olvide");
+//                    cn.desconectar();
+//                }else{
+//                    request.setAttribute("mensajeError", "No existe este usuario");
+//                    request.getRequestDispatcher("recuperar.html").forward(request, response);
+//                    cn.desconectar();
+//                }
+//            }
+//        } catch (SQLException e) {
+//            throw new ServletException("Error al intentar recuperar contraseña: " + e.getMessage(), e);
+//        } 
+//    }
+    
+    // METODOS DE ENCRIPTACION
+    // Método para encriptar la contraseña usando BCrypt
     private String hashPassword(String password) {
         return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
-    // Método para verificar la contraseña
+    // Método para verificar la contraseña (al hacer login)
     public boolean verifyPassword(String password, String storedHashedPassword) {
         return BCrypt.checkpw(password, storedHashedPassword);
     }
-
-    // Método de login que devuelve el ID del usuario si es exitoso, -1 si falla
+   //LOGIN
+    // Método para verificar usuario y contraseña usando el procedimiento almacenado
+    // Método para verificar el login
     public int Loggin(Usuarios usuario) {
         int userId = -1;
-        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall("{CALL SP_Loggin(?)}")) {
 
+        try {
+            Connection con = cn.conexion();
+            CallableStatement stmt = con.prepareCall("{CALL SP_Loggin(?)}");
             stmt.setString(1, usuario.getNombreUsuario());
+            ResultSet rs = stmt.executeQuery();
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String hashedPassword = rs.getString("CONTRASEÑA");
+            if (rs.next()) {
+                String hashedPassword = rs.getString("CONTRASEÑA");
 
-                    if (verifyPassword(usuario.getContraseña(), hashedPassword)) {
-                        userId = rs.getInt("ID");
-                        System.out.println("✅ Login Exitoso. ID: " + userId);
-                    }
+                // Verificar si la contraseña ingresada coincide con el hash almacenado
+                if (BCrypt.checkpw(usuario.getContraseña(), hashedPassword)) {
+                    userId = rs.getInt("ID"); // Retorna el ID del usuario
+                    System.out.println("Loggin Exitoso");
                 }
             }
+
+            rs.close();
+            stmt.close();
         } catch (SQLException e) {
-            System.err.println(" Error en login: " + e.getMessage());
+            JOptionPane.showMessageDialog(null, "Error en login: " + e.getMessage());
         }
-        return userId;
+
+        return userId; // Retorna -1 si no se encontró el usuario o la contraseña no es válida
     }
 
     // Obtener el rol del usuario por su ID
@@ -72,7 +118,13 @@ public class UsuarioDAO {
         } catch (SQLException e) {
             System.err.println("Error obteniendo rol: " + e.getMessage());
         }
-        return rol;
+
+        rs.close();
+        stmt.close();
+        con.close();
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error obteniendo rol: " + e.getMessage());
     }
 
     // registro de usuarios normales (Clientes)
@@ -87,12 +139,42 @@ public class UsuarioDAO {
             stmt.setString(6, "CLIENTE"); // Rol por defecto
 
             stmt.execute();
-            return true;
-        } catch (SQLException e) {
-            System.err.println("Error crearUsuario: " + e.getMessage());
-            return false;
+    return true;    
+    } catch (SQLException e) {
+        System.out.println("Error DAO crearUsuario: " + e.getMessage());
+        return false;
+    }   
+}  
+
+public List<Usuarios> listarUsuarios() {
+
+    List<Usuarios> lista = new ArrayList<>();
+
+    String sql = "{CALL sp_ObtenerListaUsuariosFinal()}";
+
+    try (Connection con = cn.conexion();
+         CallableStatement cs = con.prepareCall(sql);
+         ResultSet rs = cs.executeQuery()) {
+
+        while (rs.next()) {
+
+            Usuarios u = new Usuarios();
+
+            u.setId(rs.getInt("ID"));
+            u.setNombreCompleto(rs.getString("NOMBRE_COMPLETO"));
+            u.setNombreUsuario(rs.getString("NOMBRE_USUARIO"));
+            u.setDireccion(rs.getString("DIRECCION"));
+            u.setCorreo(rs.getString("CORREO"));
+            u.setRol(rs.getString("ROL"));
+
+            lista.add(u);
         }
+
+    } catch (SQLException e) {
+        System.out.println("Error DAO listarUsuarios: " + e.getMessage());
     }
+    return lista;
+}
 
     // MÉTODOS PARA EL CRUD DE ADMINISTRADOR
     //  LISTAR TODOS LOS USUARIOS

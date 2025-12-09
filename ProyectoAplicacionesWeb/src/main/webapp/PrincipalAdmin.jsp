@@ -1,9 +1,3 @@
-<%-- 
-    Document   : PrincipalAdmin
-    Created on : Nov 30, 2025, 8:56:29 PM
-    Author     : Arell
---%>
-
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="es">
@@ -21,17 +15,37 @@
 
     <!-- PANEL LATERAL -->
     <aside class="sidebar">
-        <button class="btn-menu">Inicio</button>
-        <button class="btn-menu">Mis compras</button>
-        <button class="btn-menu">Mis productos</button>
-        <button class="btn-menu">Mis ventas</button>
-        <button class="btn-menu">Usuario</button>
+
+        <button class="btn-menu"
+                onclick="window.location.href='ControladorPrincipalAdmin?accion=inicio'">
+            Inicio
+        </button>
+
+        <button class="btn-menu"
+                onclick="window.location.href='ControladorPrincipalAdmin?accion=inventario'">
+            Mis compras
+        </button>
+
+        <button class="btn-menu"
+                onclick="window.location.href='ControladorPrincipalAdmin?accion=misProductos'">
+            Mis productos
+        </button>
+
+        <button class="btn-menu"
+                onclick="window.location.href='ControladorPrincipalAdmin?accion=misVentas'">
+            Mis ventas
+        </button>
+
+        <button class="btn-menu"
+                onclick="window.location.href='ControladorPrincipalAdmin?accion=usuario'">
+            Usuario
+        </button>
+
     </aside>
 
     <!-- CONTENEDOR PRINCIPAL -->
     <main class="panel-principal">
-
-        <h2 class="titulo">Pagina Principal</h2>
+        <h2 class="titulo">Página Principal</h2>
 
         <div class="grid-cajas">
 
@@ -51,4 +65,3 @@
 
 </body>
 </html>
-

@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpSession;
  * @author Arell
  */
 
-
 @WebServlet(name = "ControladorCarrito", urlPatterns = {"/ControladorCarrito"})
 public class ControladorCarrito extends HttpServlet {
 
@@ -37,6 +36,12 @@ public class ControladorCarrito extends HttpServlet {
         if (accion == null) accion = "verCarrito";
 
         switch (accion) {
+            case "agregarProducto":
+                agregarProducto(request, response);
+                break;
+            case "modificarCantidad":
+                modificarCantidad(request, response);
+                break;
             case "verCarrito":
                 mostrarCarrito(request, response);
                 break;
@@ -56,8 +61,10 @@ public class ControladorCarrito extends HttpServlet {
         
         String accion = request.getParameter("accion");
 
-        if ("finalizarCompra".equals(accion)) {
-            finalizarCompra(request, response);
+        if ("iniciarCheckout".equals(accion)) { 
+            iniciarCheckout(request, response);
+        } else if ("confirmarPedido".equals(accion)) { 
+            confirmarPedido(request, response);
         } else {
             mostrarCarrito(request, response);
         }
@@ -87,7 +94,6 @@ public class ControladorCarrito extends HttpServlet {
         request.setAttribute("total", total);
         request.getRequestDispatcher("Carrito.jsp").forward(request, response);
     }
-
     private void eliminarProducto(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int idUsuario = (int) request.getSession().getAttribute("idUsuario");

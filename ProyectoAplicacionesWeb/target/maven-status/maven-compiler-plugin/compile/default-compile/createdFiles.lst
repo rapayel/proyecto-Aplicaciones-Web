@@ -6,13 +6,15 @@ Controlador\ControladorUsuario.class
 Servicios\ServicioGmail.class
 Controlador\ControladorCarrito.class
 Modelo\DAO\ProductosDAO.class
+Modelo\DAO\VentasDAO.class
 Controlador\ControladorPrincipalAdmin.class
 Modelo\Entidades\Usuarios.class
+Controlador\ControladorProductos.class
 Modelo\Entidades\Productos.class
-Servicios\ServicioHashContraseña.class
 itson\edu\mx\proyectoaplicacionesweb\JakartaRestConfiguration.class
 Modelo\Conexiones\ConexionMySQL.class
 Controlador\ControladorPrincipal.class
 Modelo\Conexiones\ConexionEmail$1.class
 Modelo\DAO\UsuarioDAO.class
-Servicios\ServicioIncriptador.class
+Modelo\Entidades\Venta.class
+Modelo\Conexiones\PruebaMySQL.class
