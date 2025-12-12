@@ -14,7 +14,7 @@ body {
 }
 
 .header h1 {
-    color: #ffcc00;
+    color: #ffffff; /* CAMBIO: Blanco */
 }
 
 .volver {
@@ -48,6 +48,35 @@ body {
     text-align: left;
 }
 
+/* Estilos para los botones +/- de cantidad */
+.form-cantidad {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-cantidad {
+    background: #444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 30px; 
+    text-align: center;
+}
+
+.btn-cantidad:hover {
+    background: #666;
+}
+
+.cantidad-actual {
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
 .total {
     margin-top: 20px;
     text-align: right;
@@ -70,8 +99,9 @@ body {
     text-align: center;
     font-size: 1.3em;
     color: #aaa;
-    
-    .btn-eliminar {
+}
+
+.btn-eliminar {
     background: #cc0000;
     color: white;
     border: none;
@@ -83,5 +113,153 @@ body {
 .btn-eliminar:hover {
     background: #ff3333;
 }
+
+
+/* ==================================== */
+/* ESTILOS ESPECÍFICOS PARA CHECKOUT Y CONFIRMACIÓN */
+/* ==================================== */
+
+.contenedor-checkout {
+    width: 60%; 
+    margin: 40px auto;
+    background: #1c1c1c;
+    padding: 30px;
+    border-radius: 10px;
 }
 
+.contenedor-checkout h1 {
+    color: #ffffff; /* CAMBIO: Blanco */
+    border-bottom: 2px solid #333;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.contenedor-checkout h2 {
+    color: #fff;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+/* --- Formulario de Checkout (Dirección/Pago) --- */
+
+.form-checkout label {
+    display: block;
+    margin-top: 15px;
+    color: #ccc;
+    font-size: 0.95em;
+}
+
+.form-checkout input[type="text"],
+.form-checkout select {
+    width: 100%; 
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background: #2a2a2a;
+    color: #fff;
+    box-sizing: border-box; 
+}
+
+.form-checkout select {
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.aviso {
+    color: #aaa;
+    font-size: 0.9em;
+    margin-top: 30px;
+    border-left: 3px solid #ffffff; /* CAMBIO: Blanco */
+    padding-left: 10px;
+}
+
+/* Botón de Confirmar Pedido */
+.btn-confirmar {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+/* --- Resumen del Pedido (Lista) --- */
+
+.seccion-resumen ul {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    border: 1px solid #333;
+    background: #252525;
+    border-radius: 5px;
+}
+
+.seccion-resumen li {
+    padding: 10px 15px;
+    border-bottom: 1px dotted #444;
+    font-size: 0.95em;
+    color: #ddd;
+}
+
+.seccion-resumen li:last-child {
+    border-bottom: none;
+}
+
+.total-resumen {
+    text-align: right;
+    font-size: 1.2em;
+    color: #ffffff; /* CAMBIO: Blanco */
+    padding-top: 10px;
+    border-top: 1px solid #444;
+}
+
+
+/* ==================================== */
+/* ESTILOS PARA CONFIRMACION.JSP */
+/* ==================================== */
+
+.contenedor-confirmacion {
+    width: 50%;
+    margin: 80px auto;
+    background: #1c1c1c;
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.contenedor-confirmacion h1 {
+    color: #ffffff; /* CAMBIO: Blanco */
+    font-size: 2.2em;
+    margin-bottom: 25px;
+}
+
+.numero-pedido {
+    background: #000;
+    padding: 15px;
+    margin: 30px auto;
+    border-radius: 5px;
+    border: 1px dashed #444;
+}
+
+.numero-pedido h2 {
+    color: #fff;
+    font-size: 1.5em;
+    margin: 0;
+}
+
+.btn-volver {
+    display: inline-block;
+    background: #0066cc; 
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-top: 20px;
+    transition: background 0.3s;
+}
+
+.btn-volver:hover {
+    background: #0088ff;
+}
