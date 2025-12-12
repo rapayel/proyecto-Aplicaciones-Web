@@ -1,8 +1,9 @@
 package Controlador;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
+import Modelo.DAO.ProductosDAO;
+import Modelo.DAO.UsuarioDAO;
+import Modelo.Entidades.Productos;
+import Modelo.Entidades.Usuarios;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,10 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-/**
- *s
- * @author Arell
- */
 @WebServlet(name = "ControladorPrincipalAdmin", urlPatterns = {"/ControladorPrincipalAdmin"})
 public class ControladorPrincipalAdmin extends HttpServlet {
 

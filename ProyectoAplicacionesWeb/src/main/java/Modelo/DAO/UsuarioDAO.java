@@ -13,9 +13,6 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import org.mindrot.jbcrypt.BCrypt;
 
-import Modelo.Conexiones.ConexionMySQL;
-import Modelo.Entidades.Usuarios;
-
 /**
  * 
  * @author lagar
@@ -103,20 +100,17 @@ public class UsuarioDAO {
 
         return userId; // Retorna -1 si no se encontró el usuario o la contraseña no es válida
     }
-
-    // Obtener el rol del usuario por su ID
     public String obtenerRolPorId(int idUsuario) {
-        String rol = null;
-        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall("{CALL sp_ObtenerRolPorId(?)}")) {
+    String rol = null;
 
-            stmt.setInt(1, idUsuario);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    rol = rs.getString("ROL");
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error obteniendo rol: " + e.getMessage());
+    try {
+        Connection con = cn.conexion();
+        CallableStatement stmt = con.prepareCall("{CALL sp_ObtenerRolPorId(?)}");
+        stmt.setInt(1, idUsuario);
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            rol = rs.getString("ROL");
         }
 
         rs.close();
@@ -127,17 +121,22 @@ public class UsuarioDAO {
         JOptionPane.showMessageDialog(null, "Error obteniendo rol: " + e.getMessage());
     }
 
-    // registro de usuarios normales (Clientes)
-    public boolean crearUsuario(Usuarios usuario) {
-        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall("{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}")) {
+    return rol; // Puede regresar null si no existe
+}
+
+public boolean crearUsuario(Usuarios usuario) {
+
+    String sql = "{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}";
+
+    try {
+            CallableStatement stmt = conexion.prepareCall("{CALL sp_CrearUsuario(?, ?, ?, ?, ?, ?)}");
 
             stmt.setString(1, usuario.getNombreCompleto());
             stmt.setString(2, usuario.getNombreUsuario());
             stmt.setString(3, usuario.getDireccion());
             stmt.setString(4, usuario.getCorreo());
-            stmt.setString(5, hashPassword(usuario.getContraseña()));
-            stmt.setString(6, "CLIENTE"); // Rol por defecto
-
+            stmt.setString(5, hashPassword(usuario.getContraseña())); // Encriptación
+            stmt.setString(6, "CLIENTE");
             stmt.execute();
     return true;    
     } catch (SQLException e) {
@@ -175,116 +174,51 @@ public List<Usuarios> listarUsuarios() {
     }
     return lista;
 }
+//  Obtener usuario completo por ID (Para llenar el formulario)
+public Usuarios obtenerUsuarioPorId(int id) {
+    Usuarios u = null;
+    String sql = "SELECT * FROM usuario WHERE ID = ?";
 
-    // MÉTODOS PARA EL CRUD DE ADMINISTRADOR
-    //  LISTAR TODOS LOS USUARIOS
-    public List<Usuarios> listarUsuarios() {
-        List<Usuarios> lista = new ArrayList<>();
-        String sql = "SELECT * FROM usuario"; // Nombre de tabla en singular según el SQL 
-
-        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Usuarios u = new Usuarios();
+    try (Connection con = cn.conexion();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        
+        ps.setInt(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                u = new Usuarios();
                 u.setId(rs.getInt("ID"));
                 u.setNombreCompleto(rs.getString("NOMBRE_COMPLETO"));
                 u.setNombreUsuario(rs.getString("NOMBRE_USUARIO"));
                 u.setDireccion(rs.getString("DIRECCION"));
                 u.setCorreo(rs.getString("CORREO"));
                 u.setRol(rs.getString("ROL"));
-                // No traemos la contraseña por seguridad
-                lista.add(u);
             }
-        } catch (SQLException e) {
-            System.err.println("Error listarUsuarios: " + e.getMessage());
         }
-        return lista;
+    } catch (SQLException e) {
+        System.err.println("Error obtenerUsuarioPorId: " + e.getMessage());
     }
+    return u;
+}
 
-    //  OBTENER USUARIO POR ID (Para llenar el formulario de edición)
-    public Usuarios obtenerUsuarioPorId(int id) {
-        Usuarios u = null;
-        String sql = "SELECT * FROM usuario WHERE ID = ?";
+//  Actualizar usuario (Llama al SP sp_ActualizarUsuario)
+public boolean actualizarUsuario(Usuarios u) {
+    String sql = "{CALL sp_ActualizarUsuario(?, ?, ?, ?, ?)}";
 
-        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql)) {
+    try (Connection con = cn.conexion();
+         CallableStatement stmt = con.prepareCall(sql)) {
 
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    u = new Usuarios();
-                    u.setId(rs.getInt("ID"));
-                    u.setNombreCompleto(rs.getString("NOMBRE_COMPLETO"));
-                    u.setNombreUsuario(rs.getString("NOMBRE_USUARIO"));
-                    u.setDireccion(rs.getString("DIRECCION"));
-                    u.setCorreo(rs.getString("CORREO"));
-                    u.setRol(rs.getString("ROL"));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error obtenerUsuarioPorId: " + e.getMessage());
-        }
-        return u;
-    }
-
-    // ACTUALIZAR USUARIO (Desde el Admin)
-    public boolean actualizarUsuario(Usuarios u) {
-        String sql = "{CALL sp_ActualizarUsuario(?, ?, ?, ?, ?)}";
-
-        try (Connection con = cn.conexion(); CallableStatement stmt = con.prepareCall(sql)) {
-
-            stmt.setInt(1, u.getId());
-            stmt.setString(2, u.getNombreCompleto());
-            stmt.setString(3, u.getNombreUsuario());
-            stmt.setString(4, u.getDireccion());
-            stmt.setString(5, u.getCorreo());
-
-            stmt.execute();
-            return true;
-        } catch (SQLException e) {
-            System.err.println("Error actualizarUsuario: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // ELIMINAR USUARIO
-    public boolean eliminarUsuario(int id) {
-        String sql = "DELETE FROM usuario WHERE ID = ?";
-
-        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println(" Error eliminarUsuario: " + e.getMessage());
-            // Si el usuario tiene ventas, esto fallará por Foreign Key. 
-            return false;
-        }
-    }
-
-    public Usuarios buscarPorNombreUsuario(String nombreUsuario) {
-        Usuarios u = null;
-        String sql = "SELECT * FROM usuario WHERE NOMBRE_USUARIO = ?";
-
-        try (Connection con = cn.conexion(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, nombreUsuario);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    u = new Usuarios();
-                    // Mapeamos las columnas exactas de tu tabla 'usuario'
-                    u.setId(rs.getInt("ID"));
-                    u.setNombreCompleto(rs.getString("NOMBRE_COMPLETO"));
-                    u.setNombreUsuario(rs.getString("NOMBRE_USUARIO"));
-                    u.setDireccion(rs.getString("DIRECCION"));
-                    u.setCorreo(rs.getString("CORREO"));
-                    u.setContraseña(rs.getString("CONTRASEÑA")); // Hash de la contraseña
-                    u.setRol(rs.getString("ROL"));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error buscarPorNombreUsuario: " + e.getMessage());
-        }
-        return u;
+        stmt.setInt(1, u.getId());
+        stmt.setString(2, u.getNombreCompleto());
+        stmt.setString(3, u.getNombreUsuario());
+        stmt.setString(4, u.getDireccion());
+        stmt.setString(5, u.getCorreo());
+        
+        stmt.execute();
+        return true;
+    } catch (SQLException e) {
+        System.err.println("Error actualizarUsuario: " + e.getMessage());
+        return false;
     }
 }
+}
+

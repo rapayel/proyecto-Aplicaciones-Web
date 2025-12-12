@@ -9,20 +9,19 @@ package Modelo.DAO;
  * @author Arell
  */
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import Modelo.Conexiones.ConexionMySQL;
 import Modelo.Entidades.Productos;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductosDAO {
 
     private final ConexionMySQL cn = new ConexionMySQL();
 
+    // ---------------------------------------------------------
+    // LISTAR PRODUCTOS
+    // ---------------------------------------------------------
     public List<Productos> listarProductos() {
 
         List<Productos> lista = new ArrayList<>();
@@ -44,21 +43,21 @@ public class ProductosDAO {
                 p.setPrecio_compra(rs.getDouble("precioCompra"));
                 p.setPrecio_venta(rs.getDouble("precioVenta"));
                 p.setCantidad_Stock(rs.getInt("Cantidad_Stock"));
+                p.setImagen(rs.getString("imagen"));
 
                 lista.add(p);
             }
 
         } catch (SQLException e) {
-<<<<<<< HEAD
-            System.out.println(" Error DAO listarProductos: " + e.getMessage());
-=======
             System.out.println("Error DAO listarProductos: " + e.getMessage());
->>>>>>> 7698b4d09af05065f24591bf50fd13e78eaa3a37
         }
 
         return lista;
     }
 
+    // ---------------------------------------------------------
+    // AGREGAR PRODUCTO AL CARRITO
+    // ---------------------------------------------------------
     public boolean agregarAlCarrito(int idUsuario, int idProducto, int cantidad) {
 
         String sql = "{CALL sp_AgregarProductoCarrito(?,?,?)}";
@@ -74,11 +73,7 @@ public class ProductosDAO {
             return true;
 
         } catch (SQLException e) {
-<<<<<<< HEAD
-            System.out.println(" Error DAO agregarAlCarrito: " + e.getMessage());
-=======
             System.out.println("Error DAO agregarAlCarrito: " + e.getMessage());
->>>>>>> 7698b4d09af05065f24591bf50fd13e78eaa3a37
             return false;
         }
     }
@@ -232,6 +227,35 @@ public class ProductosDAO {
     }
 
     return lista;
+}
+    public Productos obtenerProducto(int id) {
+    Productos p = null;
+    String sql = "{CALL sp_ObtenerProducto(?)}";
+
+    try (Connection con = cn.conexion();
+         CallableStatement stmt = con.prepareCall(sql)) {
+
+        stmt.setInt(1, id);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                p = new Productos();
+                p.setId(rs.getInt("id"));
+                p.setProducto(rs.getString("producto"));
+                p.setMarca(rs.getString("marca"));
+                p.setModelo(rs.getString("modelo"));
+                p.setDescripcion(rs.getString("descripcion"));
+                p.setPrecio_compra(rs.getDouble("precioCompra"));
+                p.setPrecio_venta(rs.getDouble("precioVenta"));
+                p.setCantidad_Stock(rs.getInt("Cantidad_Stock"));
+                p.setImagen(rs.getString("imagen"));
+            }
+        }
+
+    } catch (SQLException e) {
+        System.out.println("❌ Error DAO obtenerProducto: " + e.getMessage());
+    }
+
+    return p;
 }
 
 }

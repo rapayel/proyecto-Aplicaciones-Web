@@ -12,7 +12,7 @@
 <body>
     <header class="header">
         <div class="logo">
-            ☀️ <span>Tienda Solar</span>
+             <span>Tienda Solar</span>
         </div>
 
         <nav class="menu">

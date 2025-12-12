@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package Modelo.Entidades;
 
 /**
@@ -17,8 +14,9 @@ public class Productos {
     private Double precioCompra;
     private Double precioVenta;
     private int Cantidad_Stock;
+    private String imagen;
 
-    public Productos(int id,String producto, String marca, String modelo, String descripcion, double precio_compra, double precio_venta, int cantidad) {
+    public Productos(int id,String producto, String marca, String modelo, String descripcion, double precio_compra, double precio_venta, int cantidad, String imagen) {
         this.id= id;
         this.producto = producto;
         this.marca = marca;
@@ -27,6 +25,15 @@ public class Productos {
         this.precioCompra = precio_compra;
         this.precioVenta = precio_venta;
         this.Cantidad_Stock = cantidad;
+        this.imagen = imagen;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
     public Productos(){
         
