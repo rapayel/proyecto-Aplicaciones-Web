@@ -1,7 +1,9 @@
 Modelo\Conexiones\ConexionEmail.class
+Modelo\Entidades\ItemCarrito.class
 Modelo\DAO\CarritoDAO.class
 itson\edu\mx\proyectoaplicacionesweb\resources\JakartaEE10Resource.class
 Modelo\Conexiones\PruebaEmail.class
+Controlador\ControladorLogOut.class
 Controlador\ControladorUsuario.class
 Servicios\ServicioGmail.class
 Controlador\ControladorCarrito.class

@@ -6,38 +6,11 @@
     <meta charset="UTF-8">
     <title>Tienda Solar</title>
     <link rel="stylesheet" href="estilosCSS/estiloPrincipalJSP.css">
+    <link rel="stylesheet" href="estilosCSS/estiloFooter.css">
 </head>
 <body>
+     <jsp:include page="./componentes/header.jsp" />
     <div class="background-blur"></div>
-
-    <header class="header">
-        <div class="logo">
-             <span>Tienda Solar</span>
-        </div>
-
-        <nav class="menu">
-            <div class="dropdown">
-                <button class="dropbtn">Perfil ▼</button>
-                <div class="dropdown-content">
-                    <a href="verPerfil.jsp">Ver perfil</a>
-                    <a href="Logout">Cerrar sesión</a>
-                </div>
-            </div>
-
-            <div class="carrito">
-                <a href="ControladorCarrito?accion=verCarrito" class="carrito-link" title="Ver carrito">
-                    🛒 <span id="contador">0</span>
-                </a>
-                <p class="nombre-usuario">
-                    <% 
-                        String usuario = (String) session.getAttribute("nombreUsuario");
-                        if (usuario != null) out.print(usuario);
-                        else out.print("Invitado");
-                    %>
-                </p>
-            </div>
-        </nav>
-    </header>
    
     <section>
          <%
@@ -63,9 +36,12 @@
                 for (Productos p : lista) {
         %>
             <div class="producto">
-                <img src="images/panel_monocristalino_400w.png" alt="Imagen del producto"> 
+                <img src="DB_Imagenes/<%= p.getImagen() %>" alt="Imagen del producto">
                 <h3><%= p.getProducto() %></h3>
-                <p class="descripcion"><%= p.getDescripcion() %></p>
+                <a href="ControladorPrincipal?accion=verProducto&id=<%= p.getId() %>&t=<%= System.currentTimeMillis() %>" 
+                   class="link-verDetalles">
+                    Ver detalles
+                </a>
                 <p class="precio">$<%= p.getPrecio_venta() %> USD</p>
                 <form action="ControladorPrincipal?accion=agregarCarrito" method="post">
                     <input type="hidden" name="accion" value="agregarCarrito">
@@ -73,7 +49,7 @@
                     <input type="hidden" name="idUsuario" value="<%= session.getAttribute("idUsuario") %>">
                     <input type="number" name="Cantidad_Stock" value="1" min="1" max="<%= p.getCantidad_Stock() %>">
                     <button type="submit" class="btn-agregar">Agregar al carrito</button>
-                </form>
+                </form>                 
             </div>
         <%
                 }
@@ -85,5 +61,6 @@
         %>
         </div>
     </main>
+    <jsp:include page="./componentes/footer.jsp" />
 </body>
 </html>
