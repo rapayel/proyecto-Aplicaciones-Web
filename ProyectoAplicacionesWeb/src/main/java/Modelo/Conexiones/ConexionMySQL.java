@@ -16,7 +16,7 @@ public class ConexionMySQL {
     public String url ="jdbc:mysql://localhost:3306";
     public String nombreBD = "paneles";
     public String usuario = "root";
-    public String contra = "root";
+    public String contra = "xrapayel";
     public String driver = "com.mysql.jdbc.Driver";
     
     Connection conexion = null;
