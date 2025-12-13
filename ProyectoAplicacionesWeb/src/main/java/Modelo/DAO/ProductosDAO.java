@@ -10,6 +10,7 @@ package Modelo.DAO;
  */
 
 import Modelo.Conexiones.ConexionMySQL;
+import Modelo.Entidades.ProductoTop;
 import Modelo.Entidades.Productos;
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,6 +19,9 @@ import java.util.List;
 public class ProductosDAO {
 
     private final ConexionMySQL cn = new ConexionMySQL();
+
+    public ProductosDAO() {
+    }
 
     // ---------------------------------------------------------
     // LISTAR PRODUCTOS
@@ -256,6 +260,30 @@ public class ProductosDAO {
     }
 
     return p;
+}
+    
+    public ProductoTop obtenerProductoMasVendido() {
+    ProductoTop top = null;
+    String sql = "CALL sp_ProductoMasVendido()";
+
+    try (Connection con = cn.conexion();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        if (rs.next()) {
+            top = new ProductoTop();
+            top.setProductoId(rs.getInt("producto_id"));
+            top.setNombreProducto(rs.getString("nombre_producto"));
+            top.setImagen(rs.getString("imagen"));
+            top.setUnidadesVendidas(rs.getInt("unidades_vendidas"));
+            top.setIngresoGenerado(rs.getDouble("ingreso_generado"));
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return top;
 }
 
 }

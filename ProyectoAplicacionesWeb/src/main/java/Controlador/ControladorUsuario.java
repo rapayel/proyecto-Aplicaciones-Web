@@ -165,13 +165,12 @@ private void validarLogin(HttpServletRequest request, HttpServletResponse respon
 
         // 4. Redirección según ROL
         if ("admin".equalsIgnoreCase(rol)) {
-            response.sendRedirect("PrincipalAdmin.jsp");
+            response.sendRedirect("ControladorPrincipalAdmin?accion=inicio");
         } else {
             response.sendRedirect("ControladorPrincipal?accion=listar");
         }
 
-    } 
-    else {
+    } else {
         // Usuario o contraseña incorrectos → regresar al login con mensaje
         request.setAttribute("mensajeError", "Usuario o contraseña incorrectos");
         request.getRequestDispatcher("login.jsp").forward(request, response);

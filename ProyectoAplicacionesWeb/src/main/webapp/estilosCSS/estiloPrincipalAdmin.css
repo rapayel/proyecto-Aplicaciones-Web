@@ -1,6 +1,6 @@
-/* ==========================================
-   FONDO BORROSO OSCURO IGUAL QUE EL FIGMA
-   ========================================== */
+/* estiloPrincipalAdmin.css - Estilo moderno igual al de la tienda */
+
+/* Fondo borroso con textura grunge */
 .background-blur {
     position: fixed;
     top: 0;
@@ -10,100 +10,209 @@
     background-image: url('https://img.freepik.com/foto-gratis/textura-grunge-oscuro_1048-4055.jpg?semt=ais_hybrid&w=740&q=80');
     background-size: cover;
     background-position: center;
-    filter: blur(4px) brightness(0.45);
+    filter: blur(5px);
     z-index: -1;
 }
 
-/* ==========================================
-   ESTRUCTURA GENERAL
-   ========================================== */
+/* General */
 body {
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
     color: white;
+    min-height: 100vh;
+    background-color: #000;
 }
 
-/* Contenedor general */
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: rgba(0, 0, 0, 0.85);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #333;
+}
+
+.logo span {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Menú dropdown */
+.dropdown {
+    position: relative;
+}
+
+.dropbtn {
+    background-color: #e50914;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: rgba(30, 30, 30, 0.95);
+    min-width: 160px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    top: 100%;
+    right: 0;
+    z-index: 5;
+}
+
+.dropdown-content a {
+    display: block;
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.dropdown-content a:hover {
+    background-color: #b80710;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Layout general */
 .contenedor-general {
     display: flex;
-    width: 100%;
-    height: 100vh;
-    padding-top: 3rem;
+    min-height: calc(100vh - 80px);
 }
 
-/* ==========================================
-   SIDEBAR LATERAL — IGUAL AL FIGMA
-   ========================================== */
+/* Sidebar */
 .sidebar {
-    width: 230px;
-    background: rgba(0, 0, 0, 0.92);
-    padding: 25px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    border-radius: 12px;
-    height: 85vh;
-    margin-left: 2rem;
+    width: 250px;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2rem 0;
 }
 
 .btn-menu {
     width: 100%;
-    padding: 14px;
-    background: #1f1f1f;
+    padding: 16px 24px;
+    background: none;
     border: none;
-    border-radius: 6px;
     color: white;
-    font-size: 15px;
+    text-align: left;
+    font-size: 1.1rem;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.3s;
 }
 
 .btn-menu:hover {
-    background: #333;
+    background: #e50914;
 }
 
-/* ==========================================
-   PANEL CENTRAL — EXACTO AL FIGMA
-   ========================================== */
+/* Panel principal */
 .panel-principal {
-    background: rgba(0, 0, 0, 0.92);
-    width: 75%;
-    margin-left: 3rem;
-    padding: 2.5rem;
-    border-radius: 22px;
-    height: 85vh;
+    flex: 1;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Título */
 .titulo {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 40px;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
-/* ==========================================
-   CAJAS DEL GRID DE ADMIN
-   ========================================== */
-.grid-cajas {
+/* Dashboard grid - estilo tarjetas de producto */
+.dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 35px;
-    width: 90%;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.caja {
-    height: 160px;
-    background: #1b1b1b;
-    opacity: 0.88;
+/* Tarjetas comunes */
+.card-destacada,
+.card-metrica,
+.card-grafica {
+    background-color: rgba(0, 0, 0, 0.85);
     border-radius: 12px;
-    transition: 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.caja:hover {
-    background: #2a2a2a;
-    transform: scale(1.02);
+.card-destacada:hover,
+.card-metrica:hover,
+.card-grafica:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(229, 9, 20, 0.3);
+}
+
+/* Producto más vendido */
+.card-destacada img {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 1rem;
+}
+
+.card-destacada .nombre {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin: 1rem 0 0.5rem;
+}
+
+.card-destacada p {
+    margin: 0.5rem 0;
+}
+
+.ingresos {
+    color: #e50914;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Métrica total ventas */
+.card-metrica .numero-grande {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #e50914;
+    margin: 1rem 0;
+}
+
+/* Gráficas */
+.card-grafica canvas {
+    width: 100% !important;
+    height: 280px !important;
+    margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contenedor-general {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        padding: 1rem 0;
+    }
+    
+    .btn-menu {
+        text-align: center;
+    }
 }
