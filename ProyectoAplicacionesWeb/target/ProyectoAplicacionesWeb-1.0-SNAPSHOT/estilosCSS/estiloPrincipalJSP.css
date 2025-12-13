@@ -177,10 +177,23 @@ body {
     background-color: #b80710;
 }
 
-/* Mensaje cuando no hay productos */
 .mensaje-vacio {
     text-align: center;
     font-size: 1.2rem;
     color: #ccc;
     margin-top: 50px;
+}
+.link-verDetalles {
+    display: inline-block;
+    color: yellow;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 4px auto;
+    text-align: center;
+    padding: 2px 0;
+    width: 100%;
+}
+
+.link-verDetalles:hover {
+    color: #ffea00; 
 }

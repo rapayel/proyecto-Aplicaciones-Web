@@ -78,4 +78,116 @@ public class VentasDAO {
         }
         return detalle;
     }
+       
+    public String realizarVenta(int idUsuario) {
+        String resultado = "";
+        String sql = "{CALL sp_ComprarCarrito(?)}";
+
+        try (Connection con = cn.conexion();
+             CallableStatement stmt = con.prepareCall(sql)) {
+
+            stmt.setInt(1, idUsuario);
+            
+            // Ejecutamos el procedimiento
+            stmt.execute();
+            
+            // Si no lanza excepción, asumimos éxito
+            resultado = "exito";
+
+        } catch (SQLException e) {
+            // Capturamos los errores que lanza el SP con SIGNAL SQLSTATE '45000'
+            // Ejemplos: "No hay carrito", "Reservas expiradas", etc.
+            System.err.println("Error en realizarVenta: " + e.getMessage());
+            resultado = e.getMessage();
+        }
+        
+        return resultado;
+    }
+
+/**
+     * Elimina una venta completa y devuelve los productos al stock.
+     * Se usa una transacción para asegurar que no se borre la venta si falla la devolución de stock.
+     */
+    public boolean eliminarVenta(int idVenta) {
+        //  SQL para obtener qué productos se vendieron y cuántos
+        String sqlSelectDetalle = "SELECT producto_id, cantidad FROM detalle_venta WHERE venta_id = ?";
+        
+        //  SQL para devolver el stock (CORREGIDO: 'Cantidad_Stock')
+        String sqlRestaurarStock = "UPDATE productos SET Cantidad_Stock = Cantidad_Stock + ? WHERE id = ?";
+        
+        //  SQL para borrar detalles y cabecera
+        String sqlDeleteDetalle = "DELETE FROM detalle_venta WHERE venta_id = ?";
+        String sqlDeleteVenta = "DELETE FROM ventas WHERE id = ?";
+        
+        Connection con = null;
+        
+        try {
+            con = cn.conexion();
+            // IMPORTANTE: Inicio de transacción manual
+            con.setAutoCommit(false);
+            
+            //  Recuperar los productos de esa venta para devolverlos al inventario
+            try (PreparedStatement psSel = con.prepareStatement(sqlSelectDetalle)) {
+                psSel.setInt(1, idVenta);
+                try (ResultSet rs = psSel.executeQuery()) {
+                    
+                    // Preparamos el update del stock en lote (batch)
+                    try (PreparedStatement psStock = con.prepareStatement(sqlRestaurarStock)) {
+                        boolean hayProductos = false;
+                        while(rs.next()){
+                            int cant = rs.getInt("cantidad");
+                            int idProd = rs.getInt("producto_id");
+                            
+                            // Cantidad a sumar, ID del producto
+                            psStock.setInt(1, cant); 
+                            psStock.setInt(2, idProd);
+                            psStock.addBatch(); // Agregar al lote
+                            hayProductos = true;
+                        }
+                        
+                        // Si había productos, ejecutamos la devolución de stock
+                        if (hayProductos) {
+                            psStock.executeBatch();
+                        }
+                    }
+                }
+            }
+            
+            // P Eliminar los detalles de la venta 
+            try (PreparedStatement psDelDet = con.prepareStatement(sqlDeleteDetalle)) {
+                psDelDet.setInt(1, idVenta);
+                psDelDet.executeUpdate();
+            }
+
+            //  Eliminar la cabecera de la venta
+            try (PreparedStatement psDelVenta = con.prepareStatement(sqlDeleteVenta)) {
+                psDelVenta.setInt(1, idVenta);
+                int filas = psDelVenta.executeUpdate();
+                
+                if (filas == 0) {
+                    throw new SQLException("No se encontró la venta con ID: " + idVenta);
+                }
+            }
+            
+            // Si todo salió bien, guardamos los cambios
+            con.commit();
+            return true;
+            
+        } catch (SQLException e) {
+            System.err.println("Error eliminarVenta: " + e.getMessage());
+            // Si algo falló, deshacemos todo (Rollback)
+            if (con != null) {
+                try { con.rollback(); } catch (SQLException ex) { System.err.println("Error Rollback"); }
+            }
+            return false;
+        } finally {
+            // Restaurar estado y cerrar conexión
+            if (con != null) {
+                try { 
+                    con.setAutoCommit(true); 
+                    con.close(); 
+                } catch (SQLException ex) { System.err.println("Error Close"); }
+            }
+        }
+    }
 }

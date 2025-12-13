@@ -7,26 +7,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Mi Carrito | Tienda Solar</title>
+    <link rel="stylesheet" href="estilosCSS/estiloPrincipalJSP.css">
     <link rel="stylesheet" href="estilosCSS/estiloCarrito.css">
+    <link rel="stylesheet" href="estilosCSS/estiloFooter.css">
 </head>
 <body>
-    <header class="header">
-        <div class="logo">
-             <span>Tienda Solar</span>
-        </div>
-
-        <nav class="menu">
-            <a href="ControladorPrincipal?accion=listar" class="volver">← Seguir comprando</a>
-            <div class="dropdown">
-                <button class="dropbtn">Perfil ▼</button>
-                <div class="dropdown-content">
-                    <a href="verPerfil.jsp">Ver perfil</a>
-                    <a href="Logout">Cerrar sesión</a>
-                </div>
-            </div>
-        </nav>
-    </header>
-
+   <jsp:include page="./componentes/header.jsp" />
     <main class="contenedor-carrito">
 
         <h1 class="titulo-carrito">🛒 Mi Carrito</h1>
@@ -128,10 +114,13 @@
             } 
         %>
     </main>
-
-    <footer class="footer">
-        <p>© 2025 Tienda Solar — Energía limpia y sostenible ☀️</p>
-    </footer>
+    <div class="contenedor-botones">
+      <a class="btn-volver" href="ControladorPrincipal?accion=listarProductos">
+        < Volver a la tienda
+      </a>
+    </div>
+        
+<jsp:include page="./componentes/footer.jsp" />
 </body>
 </html>
 

@@ -26,7 +26,7 @@
     <main>         
         <div class="titulo-productos">
             <h2>
-                <img src="images/solar.png" alt="Icono solar" class="icono-solar"> Productos Disponibles
+                <img src="images/disponible.png" alt="Icono solar" class="icono-solar"> Productos Disponibles
             </h2>
         </div>
         

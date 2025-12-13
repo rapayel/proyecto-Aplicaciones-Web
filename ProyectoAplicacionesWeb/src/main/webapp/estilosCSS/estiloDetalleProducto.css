@@ -1,0 +1,146 @@
+.background-blur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img.freepik.com/foto-gratis/textura-grunge-oscuro_1048-4055.jpg?semt=ais_hybrid&w=740&q=80');
+    background-size: cover;
+    background-position: center;
+    filter: blur(5px);
+    z-index: -1;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: white;
+    background-color: #222;
+}
+
+
+.container-detalle {
+    width: 75%;
+    margin: 50px auto;
+    padding: 25px;
+    background-color: rgba(0, 0, 0, 0.85);
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+
+.titulo-detalle {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: #f0f0f0;
+}
+
+.producto-detalle {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.img-detalle {
+    width: 320px;
+    border-radius: 12px;
+    border: 2px solid #444;
+    object-fit: contain;
+    background: #111;
+}
+
+.info-detalle {
+    flex: 1;
+}
+
+.info-detalle p {
+    font-size: 1.2rem;
+    margin: 10px 0;
+}
+
+.precio-detalle {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #e50914;
+}
+
+.btn-volver {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 18px;
+    background-color: #e50914;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-volver:hover {
+    background-color: #b80710;
+}
+
+
+.msg-error {
+    text-align: center;
+    font-size: 1.4rem;
+    color: #ff5555;
+    padding: 40px;
+}
+
+
+.input-cantidad {
+    width: 80px;
+    padding: 6px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background: #111;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.contenedor-botones {
+    display: flex;
+    justify-content: flex-end; 
+    margin-top: 20px;
+}
+
+.btn-agregar {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: #e50914;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+.btn-agregar:hover {
+    background-color: #b80710;
+}
+.btn-volver {
+    display: inline-block;
+    padding: 12px 18px;
+    background-color: #e50914;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-volver:hover {
+    background-color: #b80710;
+}
+
+
+
+

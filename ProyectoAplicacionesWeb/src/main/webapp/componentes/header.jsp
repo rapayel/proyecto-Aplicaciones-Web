@@ -4,7 +4,7 @@
 
 <header class="header">
     <div class="logo">
-        <span>Tienda Online Paneles Solares</span>
+        <span> <img src="images/carrito.png" alt="Carrito" class="icono-solar"> Tienda Online Paneles Solares</span>
     </div>
 
     <nav class="menu">

@@ -1,0 +1,16 @@
+.footer {
+    width: 100%;
+    background: #e50914;
+    padding: 20px 0;
+    text-align: center;
+    color: white;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    margin-top: 40px;
+}
+
+.footer img.icono-solar {
+    width: 20px;
+    vertical-align: middle;
+    margin-left: 6px;
+}

@@ -28,37 +28,6 @@ public class UsuarioDAO {
         this.conexion = cn.conexion();
     }
 
-
-        
-//       private void recuperarCuenta (HttpServletRequest request, HttpServletResponse response)
-//            throws IOException, ServletException {
-//        String nombreUsuario = request.getParameter("txtUsuario");
-//        Connection con = cn.conexion();
-//        if (con == null) {
-//            request.setAttribute("mensajeError", "Error al conectar con la base de datos.");
-//            request.getRequestDispatcher("InicioSesion.html").forward(request, response);
-//            return;
-//        }
-//        String sql = "SELECT * FROM Usuarios WHERE nombreUsuario = ?";
-//        try (PreparedStatement ps = con.prepareStatement(sql)){
-//            ps.setString(1, nombreUsuario);
-//            try(ResultSet rs = ps.executeQuery()){
-//                if(rs.next()){
-//                    String correo = rs.getString("correo");
-//                    String contra = rs.getString("contraseña");
-//                    response.sendRedirect("InicioSesion.html");
-//                    gmail.enviarCorreoAsync(correo, "recuperar contraseña", "la contraseña es: " + contra + " porfavor, que no se te olvide");
-//                    cn.desconectar();
-//                }else{
-//                    request.setAttribute("mensajeError", "No existe este usuario");
-//                    request.getRequestDispatcher("recuperar.html").forward(request, response);
-//                    cn.desconectar();
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new ServletException("Error al intentar recuperar contraseña: " + e.getMessage(), e);
-//        } 
-//    }
     
     // METODOS DE ENCRIPTACION
     // Método para encriptar la contraseña usando BCrypt
@@ -220,5 +189,52 @@ public boolean actualizarUsuario(Usuarios u) {
         return false;
     }
 }
+
+    //  Recuperar Cuenta
+    public Usuarios buscarPorNombreUsuario(String nombreUsuario) {
+        Usuarios u = null;
+        String sql = "SELECT * FROM usuario WHERE NOMBRE_USUARIO = ?";
+
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            
+            ps.setString(1, nombreUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    u = new Usuarios();
+                    u.setId(rs.getInt("ID"));
+                    u.setNombreCompleto(rs.getString("NOMBRE_COMPLETO"));
+                    u.setNombreUsuario(rs.getString("NOMBRE_USUARIO"));
+                    u.setDireccion(rs.getString("DIRECCION"));
+                    u.setCorreo(rs.getString("CORREO"));
+                    u.setContraseña(rs.getString("CONTRASEÑA")); // Necesaria para enviarla encriptada
+                    u.setRol(rs.getString("ROL"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error buscarPorNombreUsuario: " + e.getMessage());
+        }
+        return u;
+    }
+
+    
+    //  (Eliminar)
+  
+    
+    public boolean eliminarUsuario(int id) {
+        String sql = "DELETE FROM usuario WHERE ID = ?";
+
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            int filasAfectadas = ps.executeUpdate();
+            return filasAfectadas > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("Error eliminarUsuario: " + e.getMessage());
+            return false;
+        }
+    }
 }
 
