@@ -85,6 +85,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     min-width: 1000px;
+    cursor: pointer;
 }
 
 .tabla-ventas th,
@@ -98,6 +99,11 @@ body {
     background: #111;
     font-weight: normal;
     color: #ccc;
+}
+
+.tabla-ventas tbody tr.seleccionada{
+    background-color: rgba(255, 215, 0, 0.3) !important; /* Dorado semitransparente */
+    border: 1px solid #ffd700;
 }
 
 .tabla-ventas tr:hover {
@@ -156,18 +162,18 @@ body {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .contenedor-tabla {
         width: 90%;
     }
-    
+
     .contenedor-botones-der {
         flex-direction: row;
         justify-content: center;
         margin-top: 30px;
         margin-bottom: 40px;
     }
-    
+
     .btn-crud {
         width: 120px;
     }

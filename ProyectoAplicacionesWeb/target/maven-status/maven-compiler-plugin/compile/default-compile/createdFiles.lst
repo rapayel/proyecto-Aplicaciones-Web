@@ -10,6 +10,7 @@ Modelo\Entidades\ProductoTop.class
 Controlador\ControladorProductos.class
 itson\edu\mx\proyectoaplicacionesweb\JakartaRestConfiguration.class
 Modelo\Conexiones\ConexionMySQL.class
+Controlador\ControladorVentas.class
 Modelo\Entidades\Venta.class
 Modelo\Conexiones\ConexionEmail.class
 Modelo\Entidades\ItemCarrito.class
