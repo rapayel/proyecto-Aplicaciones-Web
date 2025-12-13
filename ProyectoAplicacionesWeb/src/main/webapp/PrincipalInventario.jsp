@@ -10,7 +10,6 @@
 
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Inventario de Productos</title>
@@ -33,12 +32,10 @@
     </button>
 </div>
 
-<!-- CONTENEDOR PRINCIPAL: TABLA IZQ + COLUMNA DERECHA -->
 <div class="contenedor-flex">
 
-    <!-- TABLA DE INVENTARIO -->
+    <!-- TABLA -->
     <div class="contenedor-tabla">
-
         <h1 class="titulo-pagina">Gestión de Inventario</h1>
 
         <div class="tabla-contenedor">
@@ -53,55 +50,105 @@
                 </thead>
 
                 <tbody>
-
                 <%
-                    List<Productos> lista = (List<Productos>) request.getAttribute("listaProductos");
+                    List<Productos> lista =
+                            (List<Productos>) request.getAttribute("listaProductos");
 
                     if (lista != null && !lista.isEmpty()) {
-
                         for (Productos p : lista) {
                 %>
+                <tr onclick="seleccionarProducto(this)"
+                    data-id="<%= p.getId() %>"
+                    data-producto="<%= p.getProducto() %>"
+                    data-modelo="<%= p.getModelo() %>"
+                    data-stock="<%= p.getCantidad_Stock() %>">
 
-                <tr>
                     <td><%= p.getId() %></td>
                     <td><%= p.getProducto() %></td>
                     <td><%= p.getModelo() %></td>
                     <td><%= p.getCantidad_Stock() %></td>
                 </tr>
-
                 <%
                         }
-
                     } else {
                 %>
                 <tr>
-                    <td colspan="4" class="mensaje-vacio">No hay productos en inventario.</td>
+                    <td colspan="4" class="mensaje-vacio">
+                        No hay productos en inventario.
+                    </td>
                 </tr>
                 <% } %>
                 </tbody>
-
             </table>
         </div>
+    </div>
 
-    </div> <!-- FIN TABLA -->
+    <div class="contenedor-lateral contenedor-botones-der">
 
-    <!-- COLUMNA DERECHA -->
-    <div class="contenedor-lateral">
-
-        <!-- CAMPO CANTIDAD ARRIBA -->
         <div class="cantidad-box">
             <label>Cantidad:</label>
             <input type="number" min="1" class="input-cantidad">
         </div>
 
-        <!-- BOTONES CRUD -->
-        <button class="btn-crud btn-comprar">Comprar</button>
-        <button class="btn-crud btn-modificar">Modificar</button>
-        <button class="btn-crud btn-eliminar">Eliminar</button>
+        <button class="btn-crud btn-comprar"
+                onclick="accionStock('sumar')">Comprar</button>
+
+        <button class="btn-crud btn-modificar"
+                onclick="accionStock('modificar')">Modificar</button>
+
+        <button class="btn-crud btn-eliminar"
+                onclick="accionStock('eliminar')">Eliminar</button>
+
+        <div id="productoSeleccionado"
+             style="display:none; margin-top:20px; background:rgba(0,0,0,0.5); padding:15px; border-radius:10px;">
+            <h3>Producto seleccionado</h3>
+            <p><strong>ID:</strong> <span id="selId"></span></p>
+            <p><strong>Producto:</strong> <span id="selNombre"></span></p>
+            <p><strong>Modelo:</strong> <span id="selModelo"></span></p>
+            <p><strong>Stock actual:</strong> <span id="selStock"></span></p>
+        </div>
 
     </div>
 
-</div> <!-- FIN contenedor-flex -->
+</div>
+
+<script>
+let productoIdSeleccionado = null;
+function seleccionarProducto(fila) {
+
+    productoIdSeleccionado = fila.dataset.id;
+
+    document.getElementById("selId").textContent = fila.dataset.id;
+    document.getElementById("selNombre").textContent = fila.dataset.producto;
+    document.getElementById("selModelo").textContent = fila.dataset.modelo;
+    document.getElementById("selStock").textContent = fila.dataset.stock;
+
+    document.getElementById("productoSeleccionado").style.display = "block";
+}
+
+
+function accionStock(tipo) {
+
+    const cantidadInput = document.querySelector(".input-cantidad");
+    const cantidad = cantidadInput.value;
+
+    if (!productoIdSeleccionado) {
+        alert("⚠️ Selecciona un producto primero");
+        return;
+    }
+
+    if (tipo !== 'eliminar' && (!cantidad || cantidad <= 0)) {
+        alert("⚠️ Ingresa una cantidad válida");
+        return;
+    }
+
+    window.location.href =
+        "ControladorPrincipalAdmin?accion=stock"
+        + "&tipo=" + tipo
+        + "&id=" + productoIdSeleccionado
+        + "&cantidad=" + (cantidad || 0);
+}
+</script>
 
 </body>
 </html>

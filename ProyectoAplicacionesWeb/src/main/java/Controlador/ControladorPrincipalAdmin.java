@@ -67,9 +67,29 @@ public class ControladorPrincipalAdmin extends HttpServlet {
         } else if ("usuario".equals(accion)) {
             request.setAttribute("listaUsuarios", usuarioDAO.listarUsuarios());
             request.getRequestDispatcher("PrincipalUsuarios.jsp").forward(request, response);
+        } else if ("stock".equals(accion)) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            int cantidad = Integer.parseInt(request.getParameter("cantidad"));
+            String tipo = request.getParameter("tipo");
+            boolean resultado = false;
+            switch (tipo) {
+                case "sumar":
+                    resultado = productosDAO.sumarStock(id, cantidad);
+                    break;
+
+                case "modificar":
+                    resultado = productosDAO.modificarStock(id, cantidad);
+                    break;
+
+                case "eliminar":
+                    resultado = productosDAO.eliminarStock(id);
+                    break;
+            }
+            request.getSession().setAttribute("resultadoStock", resultado);
+            response.sendRedirect("ControladorPrincipalAdmin?accion=inventario");
         } else {
             mostrarDashboard(request, response);
-        }
+        } 
     }
 
     private void mostrarDashboard(HttpServletRequest request, HttpServletResponse response)
@@ -86,4 +106,6 @@ public class ControladorPrincipalAdmin extends HttpServlet {
             throws ServletException, IOException {
         doGet(request, response);
     }
+    
+    
 }
