@@ -263,28 +263,66 @@ public class ProductosDAO {
 }
     
     public ProductoTop obtenerProductoMasVendido() {
-    ProductoTop top = null;
-    String sql = "CALL sp_ProductoMasVendido()";
+        ProductoTop top = null;
+        String sql = "CALL sp_ProductoMasVendido()";
 
-    try (Connection con = cn.conexion();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+        try (Connection con = cn.conexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-        if (rs.next()) {
-            top = new ProductoTop();
-            top.setProductoId(rs.getInt("producto_id"));
-            top.setNombreProducto(rs.getString("nombre_producto"));
-            top.setImagen(rs.getString("imagen"));
-            top.setUnidadesVendidas(rs.getInt("unidades_vendidas"));
-            top.setIngresoGenerado(rs.getDouble("ingreso_generado"));
+            if (rs.next()) {
+                top = new ProductoTop();
+                top.setProductoId(rs.getInt("producto_id"));
+                top.setNombreProducto(rs.getString("nombre_producto"));
+                top.setImagen(rs.getString("imagen"));
+                top.setUnidadesVendidas(rs.getInt("unidades_vendidas"));
+                top.setIngresoGenerado(rs.getDouble("ingreso_generado"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return top;
     }
 
-    return top;
-}
+    public boolean sumarStock(int idProducto, int cantidad) {
+        String sql = "UPDATE productos SET Cantidad_Stock = Cantidad_Stock + ? WHERE id = ?";
+        try (Connection con = cn.conexion();
+            PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idProducto);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error DAO sumarStock: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean modificarStock(int idProducto, int cantidad) {
+        String sql = "UPDATE productos SET Cantidad_Stock = ? WHERE id = ?";
+        try (Connection con = cn.conexion();
+            PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, cantidad);
+            ps.setInt(2, idProducto);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error DAO modificarStock: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public boolean eliminarStock(int idProducto) {
+        String sql = "UPDATE productos SET Cantidad_Stock = 0 WHERE id = ?";
+        try (Connection con = cn.conexion();
+            PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idProducto);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error DAO eliminarStock: " + e.getMessage());
+            return false;
+        }
+    }
 
 }
 
