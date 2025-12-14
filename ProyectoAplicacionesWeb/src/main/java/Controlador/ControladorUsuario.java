@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package Controlador;
 
 import Modelo.DAO.UsuarioDAO;
@@ -124,30 +120,7 @@ public class ControladorUsuario extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    //    private void registrarUsuario(HttpServletRequest request, HttpServletResponse response)
-    //            throws IOException, ServletException {
-    //        String nombreCompleto = request.getParameter("txtNombre");
-    //        String nombreUsuario = request.getParameter("txtUsuario");
-    //        String direccion = request.getParameter("txtDireccion");
-    //        String correo = request.getParameter("txtEmail");
-    //        String contraseña = request.getParameter("txtPassword");
-    //
-    //        Usuarios nuevo = new Usuarios(null, nombreCompleto, nombreUsuario, direccion, correo, contraseña, null);
-    //
-    //        if (usuarioDAO.registrarUsuario(nuevo)) {
-    //            servicioGmail.enviarCorreoAsync(
-    //                    correo,
-    //                    "Bienvenido a nuestra tienda online de paneles solares",
-    //                    "Gracias por registrarse en nuestra página. ¡Esté atento a nuestras notificaciones!"
-    //            );
-    //            response.sendRedirect("index.html");
-    //        } else {
-    //            response.sendRedirect("registro.html?error=1");
-    //        }
-    //    }
-    /**
-     * Método encargado de validar el inicio de sesión de un usuario
-     */
+  
     private void validarLogin(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 

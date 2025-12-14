@@ -43,7 +43,7 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.form-group label { 
     display: block;
     margin-bottom: 5px;
     color: #bbb;
@@ -104,11 +104,6 @@ body {
     }
 }
 
-/* Efecto al pasar el mouse por encima */
-.tabla-usuarios tbody tr:hover {
-    background-color: #f1f1f1;
-}
-
 @media (max-width: 480px) {
     .login-container {
         width: 95%;
@@ -133,6 +128,6 @@ body {
     }
 
     body {
-        font-size: 18px;
+        font-size: 18px; 
     }
 }

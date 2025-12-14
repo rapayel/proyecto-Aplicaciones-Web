@@ -3,15 +3,11 @@ package Controlador;
 import Modelo.DAO.ProductosDAO;
 import Modelo.DAO.UsuarioDAO;
 import Modelo.DAO.VentasDAO;
-import Modelo.Entidades.Productos;
 import Modelo.Entidades.Usuarios;
-import Modelo.Entidades.ProductoTop;
-import Modelo.Entidades.VentaDetalleCompleta;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet(name = "ControladorPrincipalAdmin", urlPatterns = {"/ControladorPrincipalAdmin"})
 public class ControladorPrincipalAdmin extends HttpServlet {
@@ -84,12 +80,38 @@ public class ControladorPrincipalAdmin extends HttpServlet {
                 case "eliminar":
                     resultado = productosDAO.eliminarStock(id);
                     break;
+                case "guardar_admin":
+                    guardarDesdeAdmin(request, response);
+                    break;
+                
             }
             request.getSession().setAttribute("resultadoStock", resultado);
             response.sendRedirect("ControladorPrincipalAdmin?accion=inventario");
+        }
+        else if ("eliminarVenta".equals(accion)) {
+    // === LÓGICA DE ELIMINAR VENTA ===
+    try {
+        // 1. Recibe el ID que manda el JSP
+        int idVenta = Integer.parseInt(request.getParameter("idVenta"));
+        
+        // 2. Llama al DAO para borrar la venta y devolver el stock
+        boolean exito = ventasDAO.eliminarVenta(idVenta);
+        
+        // 3. Guarda un mensaje para mostrarlo en la pantalla (verde o rojo)
+        if (exito) {
+            request.getSession().setAttribute("mensajeVenta", "Venta eliminada correctamente.");
         } else {
+            request.getSession().setAttribute("mensajeVenta", "Error al eliminar la venta.");
+        }
+    } catch (Exception e) {
+        request.getSession().setAttribute("mensajeVenta", "Error: ID inválido.");
+    }
+    // 4. Recarga la página para ver que ya no está la venta
+    response.sendRedirect("ControladorPrincipalAdmin?accion=misVentas");
+}
+        else {
             mostrarDashboard(request, response);
-        } 
+        }
     }
 
     private void mostrarDashboard(HttpServletRequest request, HttpServletResponse response)
@@ -105,7 +127,45 @@ public class ControladorPrincipalAdmin extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
+
     }
-    
-    
+
+    private void guardarDesdeAdmin(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String idStr = request.getParameter("id");
+
+        String nombre = request.getParameter("txtNombreCompleto");
+    String usuario = request.getParameter("txtUsuario");
+    String correo = request.getParameter("txtCorreo");
+    String direccion = request.getParameter("txtDireccion");
+    String rol = request.getParameter("txtRol"); // ⚠️ solo se guarda al CREAR
+    String pass = request.getParameter("txtPassword");
+
+    Usuarios u = new Usuarios();
+    u.setNombreCompleto(nombre);
+    u.setNombreUsuario(usuario);
+    u.setCorreo(correo);
+    u.setDireccion(direccion);
+
+    // 🟢 CREAR
+    if (idStr == null || idStr.isEmpty()) {
+
+        u.setContraseña(pass);
+        u.setRol("CLIENTE"); // 🔹 forzado porque el DAO así trabaja
+        usuarioDAO.crearUsuario(u);
+
+    } 
+    // 🟡 EDITAR
+    else {
+
+        u.setId(Integer.parseInt(idStr));
+
+        // ❗ No se toca contraseña ni rol (porque el SP no los maneja)
+        usuarioDAO.actualizarUsuario(u);
+    }
+
+    response.sendRedirect("ControladorPrincipalAdmin?accion=usuario");
+}
+
 }
