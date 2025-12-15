@@ -83,8 +83,8 @@ public class ProductosDAO {
     }
     
     public boolean agregarProducto(Productos p) {
-        String sql = "INSagregarProductoERT INTO productos (producto, marca, modelo, descripcion, precioCompra, precioVenta, Cantidad_Stock) "
-                   + "VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO productos (producto, marca, modelo, descripcion, precioCompra, precioVenta, Cantidad_Stock) "
+                 + "VALUES (?,?,?,?,?,?,?)";
 
         try (Connection con = cn.conexion();
              PreparedStatement ps = con.prepareStatement(sql)) {

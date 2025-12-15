@@ -1,9 +1,8 @@
-     /*
+/*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
 package Controlador;
-
 
 import Modelo.DAO.ProductosDAO;
 import Modelo.Entidades.Productos;
@@ -22,11 +21,11 @@ public class ControladorProductos extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String accion = request.getParameter("accion");
 
         if (accion == null) {
-            accion = "Listar"; 
+            accion = "Listar";
         }
 
         switch (accion) {
@@ -51,7 +50,6 @@ public class ControladorProductos extends HttpServlet {
                 response.sendRedirect("ControladorProductos?accion=Listar");
                 break;
 
-    
             case "Editar":
                 int idEdit = Integer.parseInt(request.getParameter("id"));
                 request.setAttribute("producto", dao.buscarProducto(idEdit));
@@ -71,10 +69,11 @@ public class ControladorProductos extends HttpServlet {
                 dao.actualizarProducto(producto);
                 response.sendRedirect("ControladorProductos?accion=Listar");
                 break;
-            case "Eliminar":
+            // Cambia "Eliminar" por "eliminar"
+            case "eliminar":
                 int idEliminar = Integer.parseInt(request.getParameter("id"));
                 dao.eliminarProducto(idEliminar);
-                response.sendRedirect("ControladorProductos?accion=Listar");
+                response.sendRedirect("ControladorProductos?accion=Listar"); 
                 break;
 
             default:
@@ -82,16 +81,82 @@ public class ControladorProductos extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
+    // Usamos doPost para GUARDAR y EDITAR (vienen del formulario)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        String accion = request.getParameter("accion");
+
+        if (accion != null && accion.equalsIgnoreCase("guardar")) {
+            try {
+                // 1. Recibir datos del formulario (nombres coinciden con el name="" del JSP)
+                String idStr = request.getParameter("id"); // Input hidden
+                String nombre = request.getParameter("txtProducto");
+                String marca = request.getParameter("txtMarca");
+                String modelo = request.getParameter("txtModelo");
+                String descripcion = request.getParameter("txtDescripcion");
+
+                // Manejo de números (con validación básica para evitar errores si vienen vacíos)
+                double pCompra = 0;
+                double pVenta = 0;
+
+                if (request.getParameter("txtPrecioCompra") != null && !request.getParameter("txtPrecioCompra").isEmpty()) {
+                    pCompra = Double.parseDouble(request.getParameter("txtPrecioCompra"));
+                }
+                if (request.getParameter("txtPrecioVenta") != null && !request.getParameter("txtPrecioVenta").isEmpty()) {
+                    pVenta = Double.parseDouble(request.getParameter("txtPrecioVenta"));
+                }
+
+                // 2. Llenar el objeto
+                Productos p = new Productos();
+                p.setProducto(nombre);
+                p.setMarca(marca);
+                p.setModelo(modelo);
+                p.setDescripcion(descripcion);
+                p.setPrecio_compra(pCompra);
+                p.setPrecio_venta(pVenta);
+                // Si tienes stock en el formulario, agrégalo. Si no, ponle un default o quítalo
+                // p.setCantidad_Stock(Integer.parseInt(request.getParameter("txtStock"))); 
+
+                // 3. Lógica INTELIGENTE (Insertar vs Actualizar)
+                if (idStr == null || idStr.isEmpty()) {
+                    // Si NO hay ID, es un producto NUEVO
+                    // Asegúrate que tu DAO tenga un método agregar que reciba objeto
+                    dao.agregarProducto(p);
+                } else {
+                    // Si HAY ID, es una EDICIÓN
+                    p.setId(Integer.parseInt(idStr));
+                    dao.actualizarProducto(p);
+                }
+
+                // 4. Redirigir SIEMPRE al controlador principal (tu vista bonita)
+                response.sendRedirect("ControladorPrincipalAdmin?accion=inicio"); // O ?accion=productos según tu lógica
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error en ControladorProducto POST: " + e.getMessage());
+            }
+        }
     }
 
+    // Usamos doGet para ELIMINAR 
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String accion = request.getParameter("accion");
+
+        if (accion != null && accion.equalsIgnoreCase("eliminar")) {
+            try {
+                int id = Integer.parseInt(request.getParameter("id"));
+                dao.eliminarProducto(id);
+
+                // Redirigir al controlador principal
+                response.sendRedirect("ControladorPrincipalAdmin?accion=inicio");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
